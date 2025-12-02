@@ -12,5 +12,5 @@ struct Note : Identifiable {
     
     var title : String
     var date : Date
-    var tags : [Tag]
+    var tags : [String]
 }

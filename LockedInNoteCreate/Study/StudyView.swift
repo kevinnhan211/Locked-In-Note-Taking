@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct StudyView: View {
-    @State private var notes : [String] = []
+    @State private var notes : [Note] = []
     @State private var search : String = ""
     
     @State private var tags : [Tag] = [
@@ -60,7 +60,27 @@ struct StudyView: View {
                             noteName: $noteName,
                             noteTags: $noteTags,
                             onSave: {
-
+                                // Add Note
+                                if !noteName.isEmpty {
+                                    notes.append(
+                                        Note(title: noteName, date: .now, tags: noteTags)
+                                    )
+                                    
+                                    var newTags = []
+                                    for existingTag in tags {
+                                        for noteTag in noteTags {
+                                            if !noteTag.isEmpty && existingTag.name != noteTag {
+                                                newTags.append(noteTag)
+                                            }
+                                        }
+                                    }
+                                    
+                                    for newTag in newTags {
+                                        tags.append(
+                                            Tag(name:newTag as! String)
+                                        )
+                                    }
+                                }
 
                                 // Reset for next time
                                 noteName = "Untitled Note"
@@ -128,10 +148,10 @@ struct StudyView: View {
                     .padding()
 
                 ScrollView {
-                    ForEach(notes.enumerated(), id: \.element) {
-                        index, note in
+                    ForEach($notes) {
+                        $note in
                         
-                        NoteButton(name : "\(note)", dateString: .now, action:{
+                        NoteButton(name : "\(note.title)", dateString: note.date, action:{
                             
                         }, menuAction: {
                             
