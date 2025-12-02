@@ -60,8 +60,7 @@ struct StudyView: View {
                             noteName: $noteName,
                             noteTags: $noteTags,
                             onSave: {
-                                let formatted = "\(noteName)"
-                                notes.append(formatted)
+
 
                                 // Reset for next time
                                 noteName = "Untitled Note"

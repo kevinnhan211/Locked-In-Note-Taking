@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct AddNoteSheet: View {
+    @State private var noteTag : String = ""
+    @State private var showPopup : Bool = false
+    
     @Binding var noteName: String
     @Binding var noteTags: [String]
 
@@ -15,10 +18,53 @@ struct AddNoteSheet: View {
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
+        
         NavigationView {
             Form {
-                TextField("Note Name", text: $noteName)
-                //TextField("Tags (optional)", text: $noteTags)
+                Section(header: Text("Note Title")) {
+                    TextField("Note Name", text: $noteName)
+                }
+                
+                Section(header: HStack{
+                    Text("Tags")
+                    Spacer()
+                    
+                    Button(action:{
+                        showPopup = true
+                    }){
+                        Text("Add")
+                    }
+                    .alert("New Tag", isPresented: $showPopup) {
+                        TextField("", text: $noteTag)
+                        
+                        Button(role: .cancel) {
+                            noteTag = ""
+                        }
+                        
+                        Button(action: {
+                            if noteTag.isEmpty { return }
+                            
+                            for existingTag in noteTags {
+                                if existingTag == noteTag {
+                                    noteTag = ""
+                                    return
+                                }
+                            }
+                            
+                            noteTags.append(noteTag)
+                            noteTag = ""
+                        }) {
+                            Text("Ok")
+                        }
+                    }
+                    
+                }) {
+                    List(noteTags, id: \.self) {
+                        tag in
+                        Text(tag)
+                    }
+                }
+                
             }
             .navigationTitle("New Note")
             .toolbar {
