@@ -21,21 +21,28 @@ struct AddNoteSheet: View {
         
         NavigationView {
             Form {
-                Section(header: Text("Note Title")) {
+                Section(header: Text("Note Title")
+                    .font(.custom("Futura Medium", size: 23))
+                    .foregroundStyle(.white)) {
                     TextField("Note Name", text: $noteName)
                 }
                 
                 Section(header: HStack{
                     Text("Tags")
+                        .font(.custom("Futura Medium", size: 23))
+                        .foregroundStyle(.white)
                     Spacer()
                     
                     Button(action:{
                         showPopup = true
                     }){
                         Text("Add")
+                            .font(.custom("Futura Medium", size: 23))
+                            .foregroundStyle(.tint)
                     }
                     .alert("New Tag", isPresented: $showPopup) {
                         TextField("", text: $noteTag)
+                            .autocorrectionDisabled()
                         
                         Button(role: .cancel) {
                             noteTag = ""
@@ -58,7 +65,7 @@ struct AddNoteSheet: View {
                         }
                     }
                     
-                }) {
+                }) { 
                     List(noteTags, id: \.self) {
                         tag in
                         Text(tag)
@@ -67,6 +74,9 @@ struct AddNoteSheet: View {
                 
             }
             .navigationTitle("New Note")
+            
+            
+            
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
