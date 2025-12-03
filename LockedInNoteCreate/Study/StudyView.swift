@@ -11,14 +11,15 @@ struct StudyView: View {
     @State private var notes : [Note] = []
     @State private var search : String = ""
     
-    @State private var tags : [Tag] = [
-        Tag(name:"Math")
-    ]
+    @State private var tags : [Tag] = []
     
     // State vars for adding notes
     @State private var showAddNoteSheet = false
     @State private var noteName = "Untitled Note"
     @State private var noteTags : [String] = []
+    
+    // State vars for active tags
+    @State private var activeTags : [String] = []
     
     var body: some View {
         ZStack {
@@ -66,29 +67,36 @@ struct StudyView: View {
                                         Note(title: noteName, date: .now, tags: noteTags)
                                     )
                                     
-                                    var newTags = []
-                                    for existingTag in tags {
-                                        for noteTag in noteTags {
-                                            if !noteTag.isEmpty && existingTag.name != noteTag {
-                                                newTags.append(noteTag)
+                                    var newTags : [String] = []
+                                    var tagExists : Bool = false
+                                    for noteTag in noteTags {
+                                        for existingTag in tags {
+                                            if noteTag.isEmpty || noteTag == existingTag.name {
+                                                tagExists = true
                                             }
+                                        }
+                                        
+                                        if tagExists {
+                                            tagExists = false
+                                        } else {
+                                            newTags.append(noteTag)
                                         }
                                     }
                                     
                                     for newTag in newTags {
                                         tags.append(
-                                            Tag(name:newTag as! String)
+                                            Tag(name:newTag)
                                         )
                                     }
                                 }
-
+                                
                                 // Reset for next time
                                 noteName = "Untitled Note"
                                 noteTags = []
                             }
                         )
                     }
-
+                    
                 }
                 .offset(y:10)
                 
@@ -107,7 +115,7 @@ struct StudyView: View {
                     ) {
                         ForEach($tags) {
                             $tag in
-                            TagButton(tag : $tag)
+                            TagButton(tag : $tag, activeTags: $activeTags)
                         }
                     }
                     .padding()
@@ -115,52 +123,53 @@ struct StudyView: View {
                 .frame(width: 350, height: 120)   // your size
                 .background(Color.buttonColour)
                 .cornerRadius(12)
-
+                
                 
                 TextField(text: $search) {
                     Text("Search")
                         .font(Font.custom("Futura Medium", size: 15))
                         .foregroundStyle(.gray)
                 }
-                    .padding(.leading, 35)     // space for magnifying glass
-                    .padding(.trailing, 35)    // space for mic
-                    .frame(width: 350, height: 40)
-                    .font(.custom("Futura Medium", size: 15))
-                    .foregroundStyle(Color.white)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .foregroundStyle(.buttonColour)
-                    )
-                    .overlay(
-                        HStack {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundColor(.white)
-                                .padding(.leading, 8)
-
-                            Spacer()
-
-                            Image(systemName: "mic.fill")
-                                .foregroundColor(.gray)
-                                .padding(.trailing, 8)
-                        }
-                    )
-                    .autocorrectionDisabled()
-                    .padding()
-
-                ScrollView {
-                    ForEach($notes) {
-                        $note in
+                .padding(.leading, 35)     // space for magnifying glass
+                .padding(.trailing, 35)    // space for mic
+                .frame(width: 350, height: 40)
+                .font(.custom("Futura Medium", size: 15))
+                .foregroundStyle(Color.white)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .foregroundStyle(.buttonColour)
+                )
+                .overlay(
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.white)
+                            .padding(.leading, 8)
                         
-                        NoteButton(name : "\(note.title)", dateString: note.date, action:{
-                            
-                        }, menuAction: {
-                            
-                        })
-
+                        Spacer()
+                        
+                        Image(systemName: "mic.fill")
+                            .foregroundColor(.gray)
+                            .padding(.trailing, 8)
                     }
-                    
+                )
+                .autocorrectionDisabled()
+                .padding()
+                
+                ScrollView {
+                    ForEach(notes.filter { note in
+                        if activeTags.isEmpty { return true }
+                        return activeTags.allSatisfy { tag in note.tags.contains(tag) }
+                    }) { note in
+                        NoteButton(
+                            name: note.title,
+                            dateString: note.date,
+                            action: {},
+                            menuAction: {}
+                        )
+                    }
                 }
-
+                
+                
                 
                 
                 
@@ -169,7 +178,6 @@ struct StudyView: View {
             
             
         }
-        
         
     }
 }

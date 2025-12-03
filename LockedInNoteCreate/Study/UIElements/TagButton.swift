@@ -9,10 +9,17 @@ import SwiftUI
 
 struct TagButton: View {
     @Binding var tag : Tag
+    @Binding var activeTags : [String]
     
     var body: some View {
         Button(action: {
             $tag.wrappedValue.active = !$tag.wrappedValue.active
+            
+            if $tag.wrappedValue.active {
+                activeTags.append($tag.wrappedValue.name)
+            } else {
+                activeTags.removeAll { $0 == $tag.wrappedValue.name }
+            }
         }) {
             ZStack {
                 RoundedRectangle(cornerRadius: 12)
