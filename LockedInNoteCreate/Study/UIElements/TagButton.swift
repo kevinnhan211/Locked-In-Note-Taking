@@ -28,7 +28,7 @@ struct TagButton: View {
                 
                 Text("#\($tag.wrappedValue.name)")
                     .font(.custom("Futura Medium", size: 17))
-                    .foregroundStyle($tag.wrappedValue.active ? .white : .gray)
+                    .foregroundStyle($tag.wrappedValue.active ? .blue : .gray)
             }
             
         }

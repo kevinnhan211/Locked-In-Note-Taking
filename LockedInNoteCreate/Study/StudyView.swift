@@ -157,8 +157,19 @@ struct StudyView: View {
                 
                 ScrollView {
                     ForEach(notes.filter { note in
-                        if activeTags.isEmpty { return true }
-                        return activeTags.allSatisfy { tag in note.tags.contains(tag) }
+                        
+                        // TAG FILTER (always applies)
+                        let matchesTags =
+                            activeTags.isEmpty ||
+                            activeTags.allSatisfy { tag in note.tags.contains(tag) }
+                        
+                        // SEARCH FILTER (always applies)
+                        let matchesSearch =
+                            search.isEmpty ||
+                            note.title.localizedCaseInsensitiveContains(search)
+                        
+                        return matchesTags && matchesSearch
+                        
                     }) { note in
                         NoteButton(
                             name: note.title,
@@ -168,11 +179,7 @@ struct StudyView: View {
                         )
                     }
                 }
-                
-                
-                
-                
-                
+
                 Spacer()
             }
             

@@ -13,10 +13,10 @@ struct AddNoteSheet: View {
     
     @Binding var noteName: String
     @Binding var noteTags: [String]
-
+    
     var onSave: () -> Void
     @Environment(\.dismiss) var dismiss
-
+    
     var body: some View {
         
         NavigationView {
@@ -24,21 +24,28 @@ struct AddNoteSheet: View {
                 Section(header: Text("Note Title")
                     .font(.custom("Futura Medium", size: 23))
                     .foregroundStyle(.white)) {
-                    TextField("Note Name", text: $noteName)
-                }
+                        TextField("Note Name", text: $noteName)
+                            .font(.custom("Futura Medium", size: 17))
+                            .foregroundStyle(Color.white)
+                    }
+                    .listRowBackground(Color.gray.opacity(0.3))
                 
                 Section(header: HStack{
                     Text("Tags")
                         .font(.custom("Futura Medium", size: 23))
                         .foregroundStyle(.white)
+                    
                     Spacer()
                     
                     Button(action:{
                         showPopup = true
                     }){
-                        Text("Add")
+                        Text("+")
                             .font(.custom("Futura Medium", size: 23))
                             .foregroundStyle(.tint)
+                            .overlay(RoundedRectangle(cornerRadius:45)
+                                .frame(width: 50, height: 35)
+                                .foregroundStyle(.white.opacity(0.3)))
                     }
                     .alert("New Tag", isPresented: $showPopup) {
                         TextField("", text: $noteTag)
@@ -65,29 +72,64 @@ struct AddNoteSheet: View {
                         }
                     }
                     
-                }) { 
+                })
+                {
                     List(noteTags, id: \.self) {
                         tag in
-                        Text(tag)
+                        HStack {
+                            Text(tag)
+                                .font(.custom("Futura Medium", size: 17))
+                                .foregroundStyle(.white)
+                            
+                            Spacer()
+                            
+                            Button(action:{
+                                noteTags.removeAll(where: { $0 == tag })
+                            }) {
+                                Image(systemName:"trash")
+                                    .foregroundStyle(.red.opacity(0.9))
+                            }
+                        }
                     }
                 }
+                .listRowBackground(Color.gray.opacity(0.3))
                 
             }
-            .navigationTitle("New Note")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("New Note")
+                        .font(.custom("Futura Medium", size: 28))
+                        .foregroundColor(.white)
+                    
+                }
+            }
             
-            
+            .scrollContentBackground(.hidden)
+            .background(Color.buttonColour)
             
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(action:{
+                        dismiss()
+                    }) {
+                        Text("Cancel")
+                            .font(.custom("Futura Medium", size: 16))
+                            .foregroundStyle(.tint)
+                    }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    Button(action:{
                         onSave()
                         dismiss()
+                    }) {
+                        Text("Save")
+                            .font(.custom("Futura Medium", size: 16))
+                            .foregroundStyle(.tint)
                     }
                 }
             }
+            
         }
     }
 }
