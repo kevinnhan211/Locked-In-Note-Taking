@@ -22,7 +22,6 @@ struct StudyView: View {
     @State private var activeTags : [String] = []
     
     // State vars for editing notes
-    @State private var isEditingNoteName = false
     @State private var isEditingNoteTags = false
     
     var body: some View {
@@ -183,8 +182,11 @@ struct StudyView: View {
                             )
                             
                             let index = notes.firstIndex(where: { $0.id == note.id })!
-                            MenuNote(notes: $notes, note: $notes[index])
+                            MenuNote(isEditingNoteTags: $isEditingNoteTags,notes: $notes, note: $notes[index])
                                 .offset(x:150)
+                                .sheet(isPresented: $isEditingNoteTags) {
+                                    EditNoteTags(note: $notes[index])
+                                }
                             
                         }
 

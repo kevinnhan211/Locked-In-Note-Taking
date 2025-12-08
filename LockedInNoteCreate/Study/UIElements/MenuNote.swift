@@ -11,66 +11,70 @@ struct MenuNote: View {
     @State private var isEditingNoteName = false
     @State private var warning = false
     
+    @State private var selectedTag = "Apple"
+    
+    @Binding var isEditingNoteTags : Bool
     @Binding var notes : [Note]
     @Binding var note: Note
     
     var body : some View {
-        Menu {
-            Button() {
-                isEditingNoteName = true
-            } label: {
-                Label("Edit Name", systemImage: "pencil")
-            }
-            
-            Button() {
-                
-            } label: {
-                Label("Edit Tags", systemImage: "tag.fill")
-            }
-            
-            Button(role: .destructive) {
-                warning = true
-            } label: {
-                Label("Delete", systemImage: "trash")
-            }
-            
-        } label : {
-            // RIGHT SIDE BUTTON
-            Image(systemName: "ellipsis")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 25, height: 25)
-                .foregroundStyle(.gray)
-        }
-        .alert("Note Name", isPresented: $isEditingNoteName) {
-            let previousNoteName = note.title
-            
-            TextField("", text: $note.title)
-            
-            Button(role: .cancel) {
-                isEditingNoteName = false
-            }
-            
-            Button(action: {
-                if note.title.isEmpty {
-                    note.title = previousNoteName
+        ZStack {
+            Menu {
+                Button() {
+                    isEditingNoteName = true
+                } label: {
+                    Label("Edit Name", systemImage: "pencil")
                 }
-            }) {
-                Text("Ok")
+                
+                Button() {
+                    isEditingNoteTags = true
+                } label: {
+                    Label("Edit Tags", systemImage: "tag.fill")
+                }
+                
+                Button(role: .destructive) {
+                    warning = true
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+                
+            } label : {
+                // RIGHT SIDE BUTTON
+                Image(systemName: "ellipsis")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 25, height: 25)
+                    .foregroundStyle(.gray)
             }
-        }
-        
-        .alert("Delete note?", isPresented: $warning) {
-            Button(role: .cancel) {
-               warning = false
+            .alert("Note Name", isPresented: $isEditingNoteName) {
+                let previousNoteName = note.title
+                
+                TextField("", text: $note.title)
+                
+                Button(role: .cancel) {
+                    isEditingNoteName = false
+                }
+                
+                Button(action: {
+                    if note.title.isEmpty {
+                        note.title = previousNoteName
+                    }
+                }) {
+                    Text("Ok")
+                }
             }
             
-            Button(role: .destructive) {
-                notes.removeAll(where: { $0.id == note.id })
+            .alert("Delete Note", isPresented: $warning) {
+                Button(role: .cancel) {
+                    warning = false
+                }
+                
+                Button(role: .destructive) {
+                    notes.removeAll(where: { $0.id == note.id })
+                }
+                
             }
-            
         }
-
         
     }
     

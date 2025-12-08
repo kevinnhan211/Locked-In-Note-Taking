@@ -67,6 +67,8 @@ struct AddNoteSheet: View {
                             
                             noteTags.append(noteTag)
                             noteTag = ""
+                            
+                            print(noteTags)
                         }) {
                             Text("Ok")
                         }
