@@ -21,6 +21,10 @@ struct StudyView: View {
     // State vars for active tags
     @State private var activeTags : [String] = []
     
+    // State vars for editing notes
+    @State private var isEditingNoteName = false
+    @State private var isEditingNoteTags = false
+    
     var body: some View {
         ZStack {
             LinearGradient(colors: [.gradientTop, .gradientBottom], startPoint: .top, endPoint: .bottom)
@@ -171,12 +175,19 @@ struct StudyView: View {
                         return matchesTags && matchesSearch
                         
                     }) { note in
-                        NoteButton(
-                            name: note.title,
-                            dateString: note.date,
-                            action: {},
-                            menuAction: {}
-                        )
+                        ZStack {
+                            NoteButton(
+                                name: note.title,
+                                dateString: note.date,
+                                action: {},
+                            )
+                            
+                            let index = notes.firstIndex(where: { $0.id == note.id })!
+                            MenuNote(notes: $notes, note: $notes[index])
+                                .offset(x:150)
+                            
+                        }
+
                     }
                 }
 

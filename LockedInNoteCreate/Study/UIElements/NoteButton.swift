@@ -11,7 +11,6 @@ struct NoteButton: View {
     var name: String
     var dateString: Date
     var action: () -> Void
-    var menuAction: () -> Void = {}
     
     var body: some View {
         Button(action: action) {
@@ -31,18 +30,7 @@ struct NoteButton: View {
                             .foregroundStyle(.gray)
                     }
                     .font(.custom("Futura Medium", size: 17))
-                    
-                    Spacer()   // ← pushes ellipsis button to the right
-                    
-                    // RIGHT SIDE BUTTON
-                    Button(action: menuAction) {
-                        Image(systemName: "ellipsis")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 25, height: 25)
-                            .foregroundStyle(.gray)
-                    }
-                    .buttonStyle(.plain) // prevents outer button from triggering
+  
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 10)
