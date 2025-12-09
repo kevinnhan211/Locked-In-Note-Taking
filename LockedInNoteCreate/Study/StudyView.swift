@@ -25,6 +25,9 @@ struct StudyView: View {
     @State private var selectedNoteIndex : Int?
     @State private var isEditingNoteTags = false
     
+    // State vars for editing tags
+    @State private var isDeleteTagOn = false
+    
     var body: some View {
         ZStack {
             LinearGradient(colors: [.gradientTop, .gradientBottom], startPoint: .top, endPoint: .bottom)
@@ -105,11 +108,43 @@ struct StudyView: View {
                 }
                 .offset(y:10)
                 
-                Text("Tags")
-                    .font(.custom("Futura Medium", size: 23))
-                    .foregroundStyle(.white)
-                    .padding(.top,30)
-                    .padding(.trailing,270)
+                HStack {
+                    Text("Tags")
+                        .font(.custom("Futura Medium", size: 23))
+                        .foregroundStyle(.white)
+                    
+                    Spacer()
+                    
+                    Button(action:{
+                        isDeleteTagOn = !isDeleteTagOn
+                    }) {
+                        ZStack{
+                            RoundedRectangle(cornerRadius: 25)
+                                .frame(width:55,height:35)
+                                .foregroundStyle(Color.buttonColour)
+                            Image(systemName: "trash")
+                                .foregroundStyle(.white)
+                        }
+                    }
+                    .offset(x:-23,y:3)
+                }
+                .padding(.top,30)
+                .padding(.leading,30)
+                
+                if isDeleteTagOn {
+                    HStack{
+                        Text("Click on a tag to remove.")
+                            .font(.custom("Futura Medium", size: 14))
+                            .foregroundStyle(.white)
+                            .padding(.trailing,175)
+
+                            .overlay(RoundedRectangle(cornerRadius:12)
+                                .frame(width: 375, height: 35)
+                                .foregroundStyle(.buttonColour.opacity(0.3)))
+                            
+                            .padding(7)
+                    }
+                }
                 
                 ScrollView {
                     LazyVGrid(
@@ -120,7 +155,7 @@ struct StudyView: View {
                     ) {
                         ForEach($tags) {
                             $tag in
-                            TagButton(tag : $tag, activeTags: $activeTags)
+                            TagButton(tag : $tag, activeTags: $activeTags, isDeleteTagOn: $isDeleteTagOn, notes: $notes, tags: $tags)
                         }
                     }
                     .padding()
