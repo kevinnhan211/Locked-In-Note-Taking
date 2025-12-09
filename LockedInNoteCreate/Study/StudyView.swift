@@ -165,13 +165,13 @@ struct StudyView: View {
                         
                         // TAG FILTER (always applies)
                         let matchesTags =
-                            activeTags.isEmpty ||
-                            activeTags.allSatisfy { tag in note.tags.contains(tag) }
+                        activeTags.isEmpty ||
+                        activeTags.allSatisfy { tag in note.tags.contains(tag) }
                         
                         // SEARCH FILTER (always applies)
                         let matchesSearch =
-                            search.isEmpty ||
-                            note.title.localizedCaseInsensitiveContains(search)
+                        search.isEmpty ||
+                        note.title.localizedCaseInsensitiveContains(search)
                         
                         return matchesTags && matchesSearch
                         
@@ -187,40 +187,39 @@ struct StudyView: View {
                             MenuNote(isEditingNoteTags: $isEditingNoteTags,notes: $notes, note: $notes[index], onEditTags: {
                                 selectedNoteIndex = index
                             })
-                                .offset(x:150)
-                                .sheet(isPresented: $isEditingNoteTags) {
-                                    if let index = selectedNoteIndex {
-                                        EditNoteTags(note: $notes[index], tags: $tags,   onSave: {
-                                            var newTags : [String] = []
-                                            var tagExists : Bool = false
-                                            for noteTag in note.tags {
-                                                for existingTag in tags {
-                                                    if noteTag.isEmpty || noteTag == existingTag.name {
-                                                        tagExists = true
-                                                    }
-                                                }
-                                                
-                                                if tagExists {
-                                                    tagExists = false
-                                                } else {
-                                                    newTags.append(noteTag)
-                                                }
+                            .offset(x:150)
+                            .sheet(isPresented: $isEditingNoteTags) {
+                                EditNoteTags(note: $notes[selectedNoteIndex ?? 0], tags: $tags, onSave: {
+                                    var newTags : [String] = []
+                                    var tagExists : Bool = false
+                                    for noteTag in notes[selectedNoteIndex ?? 0].tags {
+                                        for existingTag in tags {
+                                            if noteTag.isEmpty || noteTag == existingTag.name {
+                                                tagExists = true
                                             }
-                                            
-                                            for newTag in newTags {
-                                                tags.append(
-                                                    Tag(name:newTag)
-                                                )
-                                            }
-                                        })
+                                        }
+                                        
+                                        if tagExists {
+                                            tagExists = false
+                                        } else {
+                                            newTags.append(noteTag)
+                                        }
                                     }
-                                }
+                                    
+                                    for newTag in newTags {
+                                        tags.append(
+                                            Tag(name:newTag)
+                                        )
+                                    }
+                                })
+                                
+                            }
                             
                         }
-
+                        
                     }
                 }
-
+                
                 Spacer()
             }
             
