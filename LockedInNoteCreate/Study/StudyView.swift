@@ -119,7 +119,7 @@ struct StudyView: View {
                         isDeleteTagOn = !isDeleteTagOn
                         for i in tags.indices {
                             tags[i].active = false
-                        }
+                        } 
                         activeTags = []
                     }) {
                         ZStack{
