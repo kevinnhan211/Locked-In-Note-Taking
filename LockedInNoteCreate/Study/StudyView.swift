@@ -117,6 +117,10 @@ struct StudyView: View {
                     
                     Button(action:{
                         isDeleteTagOn = !isDeleteTagOn
+                        for i in tags.indices {
+                            tags[i].active = false
+                        }
+                        activeTags = []
                     }) {
                         ZStack{
                             RoundedRectangle(cornerRadius: 25)
