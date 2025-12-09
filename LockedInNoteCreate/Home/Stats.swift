@@ -9,6 +9,12 @@ import SwiftUI
 
 struct Stats: View {
     var body: some View {
+        Text("Progress")
+            .font(.custom("Futura Medium", size: 23))
+            .foregroundStyle(.white)
+            .padding(.trailing, 255)
+            .padding(.top,20)
+        
         HStack {
             ZStack {
                 RoundedRectangle(cornerRadius:12)
@@ -18,7 +24,6 @@ struct Stats: View {
                     .font(.custom("Futura Medium", size: 16))
                     .foregroundStyle(.white)
             }
-            .padding(.top,20)
             
             ZStack {
                 RoundedRectangle(cornerRadius:12)
@@ -33,7 +38,6 @@ struct Stats: View {
                 .font(.custom("Futura Medium", size: 18))
                 .foregroundStyle(.white)
             }
-            .padding(.top,20)
         }
         
         HStack {
@@ -50,7 +54,6 @@ struct Stats: View {
                 .font(.custom("Futura Medium", size: 18))
                 .foregroundStyle(.white)
             }
-            .padding(.top,20)
             
             ZStack {
                 RoundedRectangle(cornerRadius:12)
@@ -61,8 +64,13 @@ struct Stats: View {
                     .font(.custom("Futura Medium", size: 16))
                     .foregroundStyle(.white)
             }
-            .padding(.top,20)
         }
+        
+        Text("Notifications")
+            .font(.custom("Futura Medium", size: 23))
+            .foregroundStyle(.white)
+            .padding(.trailing, 225)
+            .padding(.top,20)
         
         HStack {
             ZStack {
@@ -70,16 +78,24 @@ struct Stats: View {
                     .foregroundStyle(.buttonColour)
                     .frame(width: 100,height:100)
                 Label {
-                    Text("74%")
+                    Text("17 hr")
                 } icon: {
-                    Image(systemName: "")
-                        .foregroundStyle(.red)
+                    Image(systemName: "hourglass")
+                        .foregroundStyle(.brown)
                 }
                 .font(.custom("Futura Medium", size: 18))
                 .foregroundStyle(.white)
             }
-            .padding(.top,20)
 
+            ZStack {
+                RoundedRectangle(cornerRadius:12)
+                    .foregroundStyle(.buttonColour)
+                    .frame(width: 250,height:100)
+                Text("Your Calculus assignment is due in a day.")
+                    .frame(width:230,height:100)
+                    .font(.custom("Futura Medium", size: 16))
+                    .foregroundStyle(.white)
+            }
         }
     }
 }
