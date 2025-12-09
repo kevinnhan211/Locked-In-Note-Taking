@@ -22,6 +22,7 @@ struct StudyView: View {
     @State private var activeTags : [String] = []
     
     // State vars for editing notes
+    @State private var selectedNoteIndex : Int?
     @State private var isEditingNoteTags = false
     
     var body: some View {
@@ -63,6 +64,7 @@ struct StudyView: View {
                         AddNoteSheet(
                             noteName: $noteName,
                             noteTags: $noteTags,
+                            existingTags: $tags,
                             onSave: {
                                 // Add Note
                                 if !noteName.isEmpty {
@@ -182,10 +184,36 @@ struct StudyView: View {
                             )
                             
                             let index = notes.firstIndex(where: { $0.id == note.id })!
-                            MenuNote(isEditingNoteTags: $isEditingNoteTags,notes: $notes, note: $notes[index])
+                            MenuNote(isEditingNoteTags: $isEditingNoteTags,notes: $notes, note: $notes[index], onEditTags: {
+                                selectedNoteIndex = index
+                            })
                                 .offset(x:150)
                                 .sheet(isPresented: $isEditingNoteTags) {
-                                    EditNoteTags(note: $notes[index])
+                                    if let index = selectedNoteIndex {
+                                        EditNoteTags(note: $notes[index], tags: $tags,   onSave: {
+                                            var newTags : [String] = []
+                                            var tagExists : Bool = false
+                                            for noteTag in note.tags {
+                                                for existingTag in tags {
+                                                    if noteTag.isEmpty || noteTag == existingTag.name {
+                                                        tagExists = true
+                                                    }
+                                                }
+                                                
+                                                if tagExists {
+                                                    tagExists = false
+                                                } else {
+                                                    newTags.append(noteTag)
+                                                }
+                                            }
+                                            
+                                            for newTag in newTags {
+                                                tags.append(
+                                                    Tag(name:newTag)
+                                                )
+                                            }
+                                        })
+                                    }
                                 }
                             
                         }

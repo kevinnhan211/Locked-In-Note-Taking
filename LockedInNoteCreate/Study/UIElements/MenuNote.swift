@@ -11,11 +11,11 @@ struct MenuNote: View {
     @State private var isEditingNoteName = false
     @State private var warning = false
     
-    @State private var selectedTag = "Apple"
-    
     @Binding var isEditingNoteTags : Bool
     @Binding var notes : [Note]
     @Binding var note: Note
+    
+    var onEditTags : (() -> Void)?
     
     var body : some View {
         ZStack {
@@ -27,6 +27,7 @@ struct MenuNote: View {
                 }
                 
                 Button() {
+                    onEditTags?()
                     isEditingNoteTags = true
                 } label: {
                     Label("Edit Tags", systemImage: "tag.fill")

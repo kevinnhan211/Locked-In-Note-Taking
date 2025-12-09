@@ -13,6 +13,7 @@ struct AddNoteSheet: View {
     
     @Binding var noteName: String
     @Binding var noteTags: [String]
+    @Binding var existingTags : [Tag]
     
     var onSave: () -> Void
     @Environment(\.dismiss) var dismiss
@@ -28,6 +29,24 @@ struct AddNoteSheet: View {
                             .font(.custom("Futura Medium", size: 17))
                             .foregroundStyle(Color.white)
                     }
+                    .listRowBackground(Color.gray.opacity(0.3))
+                
+                Section(header: Text("Existing Tags")
+                    .font(.custom("Futura Medium", size: 23))
+                    .foregroundStyle(.white)) {
+                        let pickerText = existingTags.isEmpty ? "No Existing Tags" : "Choose a Tag"
+                        Picker(pickerText, selection: $noteTag) {
+                            ForEach($existingTags) { $tag in
+                                if !noteTags.contains(tag.name) {
+                                    Text(tag.name).tag(tag.name)
+                                        
+                                }
+                            }
+                        }
+                        .font(.custom("Futura Medium", size: 17))
+                        .foregroundStyle(Color.gray)
+                        .pickerStyle(.menu)
+                }
                     .listRowBackground(Color.gray.opacity(0.3))
                 
                 Section(header: HStack{
@@ -67,8 +86,6 @@ struct AddNoteSheet: View {
                             
                             noteTags.append(noteTag)
                             noteTag = ""
-                            
-                            print(noteTags)
                         }) {
                             Text("Ok")
                         }
@@ -101,7 +118,7 @@ struct AddNoteSheet: View {
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text("New Note")
-                        .font(.custom("Futura Medium", size: 28))
+                        .font(.custom("Futura Medium", size: 16))
                         .foregroundColor(.white)
                     
                 }
