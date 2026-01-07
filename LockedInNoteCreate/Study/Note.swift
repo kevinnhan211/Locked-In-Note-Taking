@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import PencilKit
 
 struct Note : Identifiable {
     let id = UUID()
@@ -13,4 +14,6 @@ struct Note : Identifiable {
     var title : String
     var date : Date
     var tags : [String]
+    
+    var drawingData: PKDrawing?
 }

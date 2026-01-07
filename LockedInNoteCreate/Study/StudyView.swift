@@ -22,6 +22,7 @@ struct StudyView: View {
     @State private var activeTags : [String] = []
     
     // State vars for editing notes
+    @State private var showingCanvas = false
     @State private var selectedNoteIndex : Int?
     @State private var isEditingNoteTags = false
     
@@ -39,227 +40,237 @@ struct StudyView: View {
                 .scaledToFit()
                 .opacity(0.25)
             
-            VStack {
-                HStack {
-                    Text("Your Notes")
-                        .font(.custom("Futura Medium", size: 30))
-                        .bold()
-                        .foregroundStyle(.white)
-                        .offset(x:18,y:2)
-                    
-                    Spacer()
-                    
-                    Button(action:{
-                        showAddNoteSheet = true
-                    }) {
-                        ZStack{
-                            RoundedRectangle(cornerRadius: 25)
-                                .frame(width:65,height:45)
-                                .foregroundStyle(Color.buttonColour)
-                            Image(systemName: "plus")
-                                .resizable()
-                                .frame(width: 20,height: 20)
-                                .foregroundStyle(.white)
-                        }
-                    }
-                    .offset(x:-15)
-                    .sheet(isPresented: $showAddNoteSheet) {
-                        AddNoteSheet(
-                            noteName: $noteName,
-                            noteTags: $noteTags,
-                            existingTags: $tags,
-                            onSave: {
-                                // Add Note
-                                if !noteName.isEmpty {
-                                    notes.append(
-                                        Note(title: noteName, date: .now, tags: noteTags)
-                                    )
-                                    
-                                    var newTags : [String] = []
-                                    var tagExists : Bool = false
-                                    for noteTag in noteTags {
-                                        for existingTag in tags {
-                                            if noteTag.isEmpty || noteTag == existingTag.name {
-                                                tagExists = true
-                                            }
-                                        }
-                                        
-                                        if tagExists {
-                                            tagExists = false
-                                        } else {
-                                            newTags.append(noteTag)
-                                        }
-                                    }
-                                    
-                                    for newTag in newTags {
-                                        tags.append(
-                                            Tag(name:newTag)
-                                        )
-                                    }
-                                }
-                                
-                                // Reset for next time
-                                noteName = "Untitled Note"
-                                noteTags = []
-                            }
-                        )
-                    }
-                    
-                }
-                .offset(y:10)
-                
-                HStack {
-                    Text("Tags")
-                        .font(.custom("Futura Medium", size: 23))
-                        .foregroundStyle(.white)
-                    
-                    Spacer()
-                    
-                    Button(action:{
-                        isDeleteTagOn = !isDeleteTagOn
-                        for i in tags.indices {
-                            tags[i].active = false
-                        } 
-                        activeTags = []
-                    }) {
-                        ZStack{
-                            RoundedRectangle(cornerRadius: 25)
-                                .frame(width:55,height:35)
-                                .foregroundStyle(Color.buttonColour)
-                            Image(systemName: "trash")
-                                .foregroundStyle(.white)
-                        }
-                    }
-                    .offset(x:-23,y:3)
-                }
-                .padding(.top,30)
-                .padding(.leading,30)
-                
-                if isDeleteTagOn {
-                    HStack{
-                        Text("Click on a tag to remove.")
-                            .font(.custom("Futura Medium", size: 14))
-                            .foregroundStyle(.white)
-                            .padding(.trailing,175)
-
-                            .overlay(RoundedRectangle(cornerRadius:12)
-                                .frame(width: 375, height: 35)
-                                .foregroundStyle(.buttonColour.opacity(0.3)))
-                            
-                            .padding(7)
-                    }
-                }
-                
-                ScrollView {
-                    LazyVGrid(
-                        columns: [
-                            GridItem(.adaptive(minimum: 80), spacing: 8)
-                        ],
-                        spacing: 8
-                    ) {
-                        ForEach($tags) {
-                            $tag in
-                            TagButton(tag : $tag, activeTags: $activeTags, isDeleteTagOn: $isDeleteTagOn, notes: $notes, tags: $tags)
-                        }
-                    }
-                    .padding()
-                }
-                .frame(width: 350, height: 120)   // your size
-                .background(Color.buttonColour)
-                .cornerRadius(12)
-                
-                
-                TextField(text: $search) {
-                    Text("Search")
-                        .font(Font.custom("Futura Medium", size: 15))
-                        .foregroundStyle(.gray)
-                }
-                .padding(.leading, 35)     // space for magnifying glass
-                .padding(.trailing, 35)    // space for mic
-                .frame(width: 350, height: 40)
-                .font(.custom("Futura Medium", size: 15))
-                .foregroundStyle(Color.white)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .foregroundStyle(.buttonColour)
-                )
-                .overlay(
+            
+            if !showingCanvas {
+                VStack {
                     HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.white)
-                            .padding(.leading, 8)
+                        Text("Your Notes")
+                            .font(.custom("Futura Medium", size: 30))
+                            .bold()
+                            .foregroundStyle(.white)
+                            .offset(x:18,y:2)
                         
                         Spacer()
                         
-                        Image(systemName: "mic.fill")
-                            .foregroundColor(.gray)
-                            .padding(.trailing, 8)
-                    }
-                )
-                .autocorrectionDisabled()
-                .padding()
-                
-                ScrollView {
-                    ForEach(notes.filter { note in
-                        
-                        // TAG FILTER (always applies)
-                        let matchesTags =
-                        activeTags.isEmpty ||
-                        activeTags.allSatisfy { tag in note.tags.contains(tag) }
-                        
-                        // SEARCH FILTER (always applies)
-                        let matchesSearch =
-                        search.isEmpty ||
-                        note.title.localizedCaseInsensitiveContains(search)
-                        
-                        return matchesTags && matchesSearch
-                        
-                    }) { note in
-                        ZStack {
-                            NoteButton(
-                                name: note.title,
-                                dateString: note.date,
-                                action: {},
-                            )
-                            
-                            let index = notes.firstIndex(where: { $0.id == note.id })!
-                            MenuNote(isEditingNoteTags: $isEditingNoteTags,notes: $notes, note: $notes[index], onEditTags: {
-                                selectedNoteIndex = index
-                            })
-                            .offset(x:150)
-                            .sheet(isPresented: $isEditingNoteTags) {
-                                EditNoteTags(note: $notes[selectedNoteIndex ?? 0], tags: $tags, onSave: {
-                                    var newTags : [String] = []
-                                    var tagExists : Bool = false
-                                    for noteTag in notes[selectedNoteIndex ?? 0].tags {
-                                        for existingTag in tags {
-                                            if noteTag.isEmpty || noteTag == existingTag.name {
-                                                tagExists = true
+                        Button(action:{
+                            showAddNoteSheet = true
+                        }) {
+                            ZStack{
+                                RoundedRectangle(cornerRadius: 25)
+                                    .frame(width:65,height:45)
+                                    .foregroundStyle(Color.buttonColour)
+                                Image(systemName: "plus")
+                                    .resizable()
+                                    .frame(width: 20,height: 20)
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                        .offset(x:-15)
+                        .sheet(isPresented: $showAddNoteSheet) {
+                            AddNoteSheet(
+                                noteName: $noteName,
+                                noteTags: $noteTags,
+                                existingTags: $tags,
+                                onSave: {
+                                    // Add Note
+                                    if !noteName.isEmpty {
+                                        notes.append(
+                                            Note(title: noteName, date: .now, tags: noteTags)
+                                        )
+                                        
+                                        var newTags : [String] = []
+                                        var tagExists : Bool = false
+                                        for noteTag in noteTags {
+                                            for existingTag in tags {
+                                                if noteTag.isEmpty || noteTag == existingTag.name {
+                                                    tagExists = true
+                                                }
+                                            }
+                                            
+                                            if tagExists {
+                                                tagExists = false
+                                            } else {
+                                                newTags.append(noteTag)
                                             }
                                         }
                                         
-                                        if tagExists {
-                                            tagExists = false
-                                        } else {
-                                            newTags.append(noteTag)
+                                        for newTag in newTags {
+                                            tags.append(
+                                                Tag(name:newTag)
+                                            )
                                         }
                                     }
                                     
-                                    for newTag in newTags {
-                                        tags.append(
-                                            Tag(name:newTag)
-                                        )
-                                    }
+                                    // Reset for next time
+                                    noteName = "Untitled Note"
+                                    noteTags = []
+                                }
+                            )
+                        }
+                        
+                    }
+                    .offset(y:10)
+                    
+                    HStack {
+                        Text("Tags")
+                            .font(.custom("Futura Medium", size: 23))
+                            .foregroundStyle(.white)
+                        
+                        Spacer()
+                        
+                        Button(action:{
+                            isDeleteTagOn = !isDeleteTagOn
+                            for i in tags.indices {
+                                tags[i].active = false
+                            } 
+                            activeTags = []
+                        }) {
+                            ZStack{
+                                RoundedRectangle(cornerRadius: 25)
+                                    .frame(width:55,height:35)
+                                    .foregroundStyle(Color.buttonColour)
+                                Image(systemName: "trash")
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                        .offset(x:-23,y:3)
+                    }
+                    .padding(.top,30)
+                    .padding(.leading,30)
+                    
+                    if isDeleteTagOn {
+                        HStack{
+                            Text("Click on a tag to remove.")
+                                .font(.custom("Futura Medium", size: 14))
+                                .foregroundStyle(.white)
+                                .padding(.trailing,175)
+                            
+                                .overlay(RoundedRectangle(cornerRadius:12)
+                                    .frame(width: 375, height: 35)
+                                    .foregroundStyle(.buttonColour.opacity(0.3)))
+                            
+                                .padding(7)
+                        }
+                    }
+                    
+                    ScrollView {
+                        LazyVGrid(
+                            columns: [
+                                GridItem(.adaptive(minimum: 80), spacing: 8)
+                            ],
+                            spacing: 8
+                        ) {
+                            ForEach($tags) {
+                                $tag in
+                                TagButton(tag : $tag, activeTags: $activeTags, isDeleteTagOn: $isDeleteTagOn, notes: $notes, tags: $tags)
+                            }
+                        }
+                        .padding()
+                    }
+                    .frame(width: 350, height: 120)   // your size
+                    .background(Color.buttonColour)
+                    .cornerRadius(12)
+                    
+                    
+                    TextField(text: $search) {
+                        Text("Search")
+                            .font(Font.custom("Futura Medium", size: 15))
+                            .foregroundStyle(.gray)
+                    }
+                    .padding(.leading, 35)     // space for magnifying glass
+                    .padding(.trailing, 35)    // space for mic
+                    .frame(width: 350, height: 40)
+                    .font(.custom("Futura Medium", size: 15))
+                    .foregroundStyle(Color.white)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .foregroundStyle(.buttonColour)
+                    )
+                    .overlay(
+                        HStack {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundColor(.white)
+                                .padding(.leading, 8)
+                            
+                            Spacer()
+                            
+                            Image(systemName: "mic.fill")
+                                .foregroundColor(.gray)
+                                .padding(.trailing, 8)
+                        }
+                    )
+                    .autocorrectionDisabled()
+                    .padding()
+                    
+                    ScrollView {
+                        ForEach(notes.filter { note in
+                            
+                            // TAG FILTER (always applies)
+                            let matchesTags =
+                            activeTags.isEmpty ||
+                            activeTags.allSatisfy { tag in note.tags.contains(tag) }
+                            
+                            // SEARCH FILTER (always applies)
+                            let matchesSearch =
+                            search.isEmpty ||
+                            note.title.localizedCaseInsensitiveContains(search)
+                            
+                            return matchesTags && matchesSearch
+                            
+                        }) { note in
+                            ZStack {
+                                let index = notes.firstIndex(where: { $0.id == note.id })!
+                                
+                                NoteButton(
+                                    name: note.title,
+                                    dateString: note.date,
+                                    action: { // this is for when the user opens a note
+                                        selectedNoteIndex = index
+                                        showingCanvas = true
+                                    },
+                                )
+                                
+                                MenuNote(isEditingNoteTags: $isEditingNoteTags,notes: $notes, note: $notes[index], onEditTags: {
+                                    selectedNoteIndex = index
                                 })
+                                .offset(x:150)
+                                .sheet(isPresented: $isEditingNoteTags) {
+                                    EditNoteTags(note: $notes[selectedNoteIndex ?? 0], tags: $tags, onSave: {
+                                        var newTags : [String] = []
+                                        var tagExists : Bool = false
+                                        for noteTag in notes[selectedNoteIndex ?? 0].tags {
+                                            for existingTag in tags {
+                                                if noteTag.isEmpty || noteTag == existingTag.name {
+                                                    tagExists = true
+                                                }
+                                            }
+                                            
+                                            if tagExists {
+                                                tagExists = false
+                                            } else {
+                                                newTags.append(noteTag)
+                                            }
+                                        }
+                                        
+                                        for newTag in newTags {
+                                            tags.append(
+                                                Tag(name:newTag)
+                                            )
+                                        }
+                                    })
+                                    
+                                }
+                                
                                 
                             }
                             
                         }
-                        
                     }
+                    
+                    Spacer()
                 }
-                
-                Spacer()
+            } else { // Canvas view open
+                DrawingView(title: $notes[selectedNoteIndex ?? 0].title, drawing: $notes[selectedNoteIndex ?? 0].drawingData, showingCanvas: $showingCanvas)
             }
             
             

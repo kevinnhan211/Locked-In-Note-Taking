@@ -20,6 +20,11 @@ struct ContentView: View {
                 .tabItem {
                     Label("Notes", systemImage:"note")
                 }
+            
+//            MainShopView()
+//                .tabItem {
+//                    Label("Shop", systemImage:"cart")
+//                }
         }
 
     }

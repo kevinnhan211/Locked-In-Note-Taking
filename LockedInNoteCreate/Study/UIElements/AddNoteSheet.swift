@@ -108,6 +108,7 @@ struct AddNoteSheet: View {
                                 Image(systemName:"trash")
                                     .foregroundStyle(.red.opacity(0.9))
                             }
+                           
                         }
                     }
                 }

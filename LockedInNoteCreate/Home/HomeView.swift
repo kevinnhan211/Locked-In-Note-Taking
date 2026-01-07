@@ -43,8 +43,15 @@ struct HomeView: View {
                             .foregroundStyle(.white)
                     }
                 }
-                
+            
                 ScrollView {
+                    Text("Good Afternoon, Kevin!")
+                        .font(.custom("Futura Medium", size: 23))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.white)
+                        .padding(.trailing, 55)
+                        .padding(.top,20)
+                    
                     Text("Overview")
                         .font(.custom("Futura Medium", size: 23))
                         .foregroundStyle(.white)
