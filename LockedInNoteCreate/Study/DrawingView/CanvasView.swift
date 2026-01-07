@@ -8,6 +8,7 @@ import PencilKit
 
 struct CanvasView: UIViewRepresentable {
     @Binding var isDrawingEnabled: Bool
+    @Binding var isTextModeEnabled: Bool
     @Binding var drawing : PKDrawing?
     
     let toolPicker = PKToolPicker()
@@ -62,6 +63,13 @@ struct CanvasView: UIViewRepresentable {
         // Set scroll delegate
         canvasView.delegate = context.coordinator as? any PKCanvasViewDelegate
         
+        // Add text
+        let tapGesture = UITapGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.handleTap(_:))
+        )
+        canvasView.addGestureRecognizer(tapGesture)
+        
         return canvasView
     }
     
@@ -77,6 +85,12 @@ struct CanvasView: UIViewRepresentable {
                 drawing = uiView.drawing
             }
         }
+        
+        if isTextModeEnabled == false && isDrawingEnabled {
+            toolPicker.setVisible(true, forFirstResponder: uiView)
+            toolPicker.addObserver(uiView)
+            uiView.becomeFirstResponder()
+        }
     }
     
     class Coordinator: NSObject, UIScrollViewDelegate {
@@ -85,11 +99,29 @@ struct CanvasView: UIViewRepresentable {
         init(parent: CanvasView) {
             self.parent = parent
         }
+        
+        @objc func handleTap(_ gesture: UITapGestureRecognizer) {
+            guard parent.isTextModeEnabled else { return }
+            guard parent.isDrawingEnabled == false else { return }
+            guard let canvasView = gesture.view as? PKCanvasView else { return }
+
+            let location = gesture.location(in: canvasView)
+
+            let textView = UITextView(frame: CGRect(x: location.x, y: location.y, width: 200, height: 40))
+            textView.font = UIFont.systemFont(ofSize: 20)
+            textView.backgroundColor = .clear
+            textView.textColor = .black
+            textView.isScrollEnabled = false
+            textView.becomeFirstResponder()
+
+            canvasView.addSubview(textView)
+        }
     }
 }
 
 struct DrawingView: View {
     @State private var isDrawingEnabled = true
+    @State private var isTextModeEnabled = false
     
     @Binding var title : String
     @Binding var drawing : PKDrawing?
@@ -104,18 +136,32 @@ struct DrawingView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(LinearGradient(colors: [.gradientBottom, .gradientTop], startPoint: .bottom, endPoint: .top))
                 
-                CanvasView(isDrawingEnabled: $isDrawingEnabled, drawing:$drawing)
+                CanvasView(isDrawingEnabled: $isDrawingEnabled, isTextModeEnabled: $isTextModeEnabled, drawing:$drawing)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    //.clipped()
                     .background(Color.clear)
                 
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
                             HStack (spacing:15) {
                                 Button {
-                                    isDrawingEnabled.toggle()
+                                    if !isTextModeEnabled {
+                                        isDrawingEnabled.toggle()
+                                    }
                                 } label: {
                                     Image(systemName: isDrawingEnabled ? "pencil" : "hand.draw")
+                                }
+                                
+                                Button {
+                                    isTextModeEnabled.toggle()
+                                    if isTextModeEnabled {
+                                        isDrawingEnabled = false
+                                    } else {
+                                        isDrawingEnabled = true
+                                    }
+                                    
+                                } label: {
+                                    Image(systemName: "textformat")
+                                        .symbolVariant(isTextModeEnabled ? .fill : .none)
                                 }
                                 
                                 // Export
@@ -161,6 +207,21 @@ struct DrawingView: View {
     }
 }
 
-//#Preview {
-//    DrawingView()
-//}
+struct DrawingViewPreviewWrapper: View {
+    @State private var title = "asdf"
+    @State private var drawing: PKDrawing? = PKDrawing()
+    @State private var showingCanvas = true
+
+    var body: some View {
+        DrawingView(
+            title: $title,
+            drawing: $drawing,
+            showingCanvas: $showingCanvas
+        )
+    }
+}
+
+
+#Preview {
+    DrawingViewPreviewWrapper()
+}
