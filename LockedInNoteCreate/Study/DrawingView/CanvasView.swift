@@ -39,7 +39,7 @@ struct CanvasView: UIViewRepresentable {
         
         // Grid background
         let gridView = DotGridView(frame: CGRect(origin: .zero, size: contentSize))
-        gridView.backgroundColor = .clear
+        gridView.backgroundColor = .white
         gridView.isUserInteractionEnabled = false
         canvasView.insertSubview(gridView, at: 0)
         
@@ -50,8 +50,8 @@ struct CanvasView: UIViewRepresentable {
         canvasView.alwaysBounceHorizontal = true
         
         // Zoom
-        canvasView.minimumZoomScale = 0.2
-        canvasView.maximumZoomScale = 4.0
+        canvasView.minimumZoomScale = 0.5
+        canvasView.maximumZoomScale = 1.6
         canvasView.zoomScale = 1.0
         
         // Tool Picker
@@ -70,7 +70,7 @@ struct CanvasView: UIViewRepresentable {
         
         // Allow mouse / single-finger pan in Pan mode
         uiView.panGestureRecognizer.minimumNumberOfTouches =
-            isDrawingEnabled ? 2 : 1
+        isDrawingEnabled ? 2 : 1
         
         if drawing != uiView.drawing {
             DispatchQueue.main.async {
@@ -94,47 +94,69 @@ struct DrawingView: View {
     @Binding var title : String
     @Binding var drawing : PKDrawing?
     @Binding var showingCanvas : Bool
-
+    
+    @Environment(\.undoManager) var undoManager
+    
     var body: some View {
         NavigationStack {
-            CanvasView(isDrawingEnabled: $isDrawingEnabled, drawing:$drawing)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .clipped()
-
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        HStack (spacing:15) {
-                            Button {
-                                isDrawingEnabled.toggle()
-                            } label: {
-                                Image(systemName: isDrawingEnabled ? "pencil" : "hand.draw")
+            ZStack {
+                Rectangle()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(LinearGradient(colors: [.gradientBottom, .gradientTop], startPoint: .bottom, endPoint: .top))
+                
+                CanvasView(isDrawingEnabled: $isDrawingEnabled, drawing:$drawing)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    //.clipped()
+                    .background(Color.clear)
+                
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            HStack (spacing:15) {
+                                Button {
+                                    isDrawingEnabled.toggle()
+                                } label: {
+                                    Image(systemName: isDrawingEnabled ? "pencil" : "hand.draw")
+                                }
+                                
+                                // Export
+                                ShareLink(item: "Kevin Nhan's \(title) - https://notelinkshare.ca") {
+                                    Image(systemName: "square.and.arrow.up")
+                                }
+                            }
+                        }
+                        
+                        ToolbarItem(placement: .principal) {
+                            Text("\(title)")
+                                .font(.custom("Futura Medium", size: 20))
+                        }
+                        
+                        ToolbarItem(placement: .topBarLeading) {
+                            HStack (spacing:15) {
+                                Button {
+                                    showingCanvas = false
+                                } label: {
+                                    Text("Back")
+                                        .font(.custom("Futura Medium", size: 18))
+                                }
+                                
+                                Button {
+                                    undoManager?.undo()
+                                } label: {
+                                    Image(systemName: "arrow.uturn.backward")
+                                }
+                                
+                                Button {
+                                    undoManager?.redo()
+                                } label: {
+                                    Image(systemName: "arrow.uturn.forward")
+                                }
                             }
                             
-                            // Export
-                            Button {
-                                print("Export")
-                            } label: {
-                                Image(systemName: "square.and.arrow.up")
-                                    .foregroundStyle(.tint)
-                            }
+                            
                         }
                     }
-                    
-                    ToolbarItem(placement: .principal) {
-                        Text("\(title)")
-                            .font(.custom("Futura Medium", size: 20))
-                    }
-                    
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button {
-                            showingCanvas = false
-                        } label: {
-                            Text("Back")
-                                .font(.custom("Futura Medium", size: 18))
-                                .foregroundStyle(.tint)
-                        }
-                    }
-                }
+                    .foregroundStyle(.white)
+            }
         }
     }
 }

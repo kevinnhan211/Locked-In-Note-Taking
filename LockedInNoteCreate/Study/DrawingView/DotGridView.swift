@@ -12,7 +12,7 @@ import PencilKit
 // Dot Grid
 class DotGridView: UIView {
     var gridSpacing: CGFloat = 25
-    var dotRadius: CGFloat = 1
+    var dotRadius: CGFloat = 1.5
     var dotColor: UIColor = .systemGray3
     
     override func draw(_ rect: CGRect) {
