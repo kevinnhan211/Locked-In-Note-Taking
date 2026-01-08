@@ -270,7 +270,7 @@ struct StudyView: View {
                     Spacer()
                 }
             } else { // Canvas view open
-                DrawingView(title: $notes[selectedNoteIndex ?? 0].title, drawing: $notes[selectedNoteIndex ?? 0].drawingData, showingCanvas: $showingCanvas)
+                DrawingView(title: $notes[selectedNoteIndex ?? 0].title, drawing: $notes[selectedNoteIndex ?? 0].drawingData, textData: $notes[selectedNoteIndex ?? 0].textData, showingCanvas: $showingCanvas)
             }
             
             

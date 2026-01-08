@@ -10,11 +10,12 @@ struct CanvasView: UIViewRepresentable {
     @Binding var isDrawingEnabled: Bool
     @Binding var isTextModeEnabled: Bool
     @Binding var drawing : PKDrawing?
+    @Binding var textData : [UITextView]?
     
     let toolPicker = PKToolPicker()
     
-    func makeCoordinator() -> Coordinator {
-        Coordinator(parent: self)
+    func makeCoordinator() -> CanvasCoordinator {
+        CanvasCoordinator(parent: self)
     }
     
     func makeUIView(context: Context) -> PKCanvasView {
@@ -28,7 +29,12 @@ struct CanvasView: UIViewRepresentable {
         canvasView.contentSize = contentSize
         canvasView.backgroundColor = .clear
         
+        // Add data
         canvasView.drawing = drawing ?? PKDrawing()
+        for i in 0..<(textData?.count ?? 0) {
+            let textView = textData![i]
+            canvasView.addSubview(textView)
+        }
         
         // Start in centre
         let viewSize = canvasView.bounds.size
@@ -61,7 +67,7 @@ struct CanvasView: UIViewRepresentable {
         canvasView.becomeFirstResponder()
         
         // Set scroll delegate
-        canvasView.delegate = context.coordinator as? any PKCanvasViewDelegate
+        canvasView.delegate = context.coordinator
         
         // Add text
         let tapGesture = UITapGestureRecognizer(
@@ -91,32 +97,14 @@ struct CanvasView: UIViewRepresentable {
             toolPicker.addObserver(uiView)
             uiView.becomeFirstResponder()
         }
-    }
-    
-    class Coordinator: NSObject, UIScrollViewDelegate {
-        var parent: CanvasView
         
-        init(parent: CanvasView) {
-            self.parent = parent
-        }
-        
-        @objc func handleTap(_ gesture: UITapGestureRecognizer) {
-            guard parent.isTextModeEnabled else { return }
-            guard parent.isDrawingEnabled == false else { return }
-            guard let canvasView = gesture.view as? PKCanvasView else { return }
-
-            let location = gesture.location(in: canvasView)
-
-            let textView = UITextView(frame: CGRect(x: location.x, y: location.y, width: 200, height: 40))
-            textView.font = UIFont.systemFont(ofSize: 20)
-            textView.backgroundColor = .clear
-            textView.textColor = .black
-            textView.isScrollEnabled = false
-            textView.becomeFirstResponder()
-
-            canvasView.addSubview(textView)
+        for i in 0..<(textData?.count ?? 0) {
+            let textView = textData![i]
+            print(textView.text!)
         }
     }
+
+
 }
 
 struct DrawingView: View {
@@ -125,6 +113,7 @@ struct DrawingView: View {
     
     @Binding var title : String
     @Binding var drawing : PKDrawing?
+    @Binding var textData : [UITextView]?
     @Binding var showingCanvas : Bool
     
     @Environment(\.undoManager) var undoManager
@@ -136,7 +125,7 @@ struct DrawingView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(LinearGradient(colors: [.gradientBottom, .gradientTop], startPoint: .bottom, endPoint: .top))
                 
-                CanvasView(isDrawingEnabled: $isDrawingEnabled, isTextModeEnabled: $isTextModeEnabled, drawing:$drawing)
+                CanvasView(isDrawingEnabled: $isDrawingEnabled, isTextModeEnabled: $isTextModeEnabled, drawing:$drawing, textData: $textData)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color.clear)
                 
@@ -202,6 +191,7 @@ struct DrawingView: View {
                         }
                     }
                     .foregroundStyle(.white)
+                
             }
         }
     }
@@ -210,12 +200,14 @@ struct DrawingView: View {
 struct DrawingViewPreviewWrapper: View {
     @State private var title = "asdf"
     @State private var drawing: PKDrawing? = PKDrawing()
+    @State private var textData : [UITextView]? = []
     @State private var showingCanvas = true
 
     var body: some View {
         DrawingView(
             title: $title,
             drawing: $drawing,
+            textData: $textData,
             showingCanvas: $showingCanvas
         )
     }
