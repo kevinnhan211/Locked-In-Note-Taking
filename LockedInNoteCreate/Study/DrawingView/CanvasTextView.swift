@@ -11,6 +11,8 @@ import UIKit
 final class CanvasTextView: UITextView {
     weak var fontPickerDelegate: UIFontPickerViewControllerDelegate?
     var onRequestFontPicker: (() -> Void)?
+    
+    var canvasPosition: CGPoint = .zero
 
     override init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)

@@ -52,11 +52,8 @@ final class CanvasCoordinator: NSObject,
     }
 
     private func createTextView(at point: CGPoint, in canvas: PKCanvasView) -> CanvasTextView {
-        let textView = CanvasTextView(
-            frame: CGRect(x: point.x, y: point.y, width: 240, height: 40)
-        )
-
-        textView.delegate = self
+        let textView = CanvasTextView(frame: CGRect(x: point.x, y: point.y, width: 240, height: 40))
+        textView.canvasPosition = point
         canvas.addSubview(textView)
         return textView
     }
@@ -163,19 +160,19 @@ final class CanvasCoordinator: NSObject,
 extension CanvasCoordinator: UIScrollViewDelegate {
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
         guard let canvas = scrollView as? PKCanvasView else { return }
-        
-        print("Pookie")
 
-        for subview in canvas.subviews {
-            if let textView = subview as? CanvasTextView {
-                // Scale text to match canvas zoom
-                let scale = canvas.zoomScale
-                textView.transform = CGAffineTransform(scaleX: scale, y: scale)
-                
-                // Adjust position so it stays at the same logical location
-                let originalCenter = textView.center
-                textView.center = CGPoint(x: originalCenter.x, y: originalCenter.y)
-            }
+        let scale = canvas.zoomScale
+
+        for case let textView as CanvasTextView in canvas.subviews {
+            textView.transform = CGAffineTransform(scaleX: scale, y: scale)
+            
+            let base = textView.canvasPosition
+            textView.center = CGPoint(
+                x: base.x * scale,
+                y: base.y * scale
+            )
         }
+        
     }
+
 }
