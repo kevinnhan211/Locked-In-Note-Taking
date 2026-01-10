@@ -28,17 +28,16 @@ final class CanvasCoordinator: NSObject,
     @objc func handleTap(_ gesture: UITapGestureRecognizer) {
         guard parent.isTextModeEnabled else { return }
         guard let canvas = gesture.view as? PKCanvasView else { return }
-        
-        cleanupIfEmpty(selectedTextView)
 
         let location = gesture.location(in: canvas)
 
-        if let textView = textView(at: location, in: canvas) {
-            configure(textView)
-            select(textView)
-            showTextEditMenu(for: textView)
+        // if tap hit an existing text view, DO NOTHING
+        if textView(at: location, in: canvas) != nil {
             return
         }
+
+        // Clean up empty previously selected text
+        cleanupEmptyTextIfNeeded()
 
         let textView = createTextView(at: location, in: canvas)
         configure(textView)
@@ -59,9 +58,15 @@ final class CanvasCoordinator: NSObject,
         canvas.addSubview(textView)
         return textView
     }
+    
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        guard let textView = textView as? CanvasTextView else { return }
+        select(textView)
+    }
 
     private func configure(_ textView: CanvasTextView) {
         textView.coordinator = self
+        textView.delegate = self
     }
     
     private func cleanupIfEmpty(_ textView: CanvasTextView?) {
@@ -73,6 +78,22 @@ final class CanvasCoordinator: NSObject,
                 selectedTextView = nil
             }
         }
+    }
+    
+    func cleanupEmptyTextIfNeeded() {
+        guard let textView = selectedTextView else { return }
+
+        let trimmed = textView.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            textView.removeFromSuperview()
+            selectedTextView = nil
+        }
+    }
+    
+    func deselectText() {
+        selectedTextView?.setSelected(false)
+        selectedTextView?.resignFirstResponder()
+        selectedTextView = nil
     }
 
     // MARK: - Edit Menu
@@ -154,11 +175,16 @@ final class CanvasCoordinator: NSObject,
     }
 
     func textViewDidEndEditing(_ textView: UITextView) {
+        guard let textView = textView as? CanvasTextView else { return }
+        
         let trimmed = textView.text.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty {
             textView.removeFromSuperview()
         }
+        
+        textView.setSelected(false)
     }
+
 
     func textViewDidChange(_ textView: UITextView) {
         let size = CGSize(width: textView.frame.width, height: .infinity)

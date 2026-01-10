@@ -92,6 +92,11 @@ struct CanvasView: UIViewRepresentable {
             }
         }
         
+        if !isTextModeEnabled {
+            context.coordinator.cleanupEmptyTextIfNeeded()
+            context.coordinator.deselectText()
+        }
+        
         if isTextModeEnabled == false && isDrawingEnabled {
             toolPicker.setVisible(true, forFirstResponder: uiView)
             toolPicker.addObserver(uiView)

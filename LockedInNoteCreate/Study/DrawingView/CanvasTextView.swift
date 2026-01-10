@@ -10,7 +10,7 @@ final class CanvasTextView: UITextView {
     weak var coordinator: CanvasCoordinator?
 
     private let selectionBorder = CAShapeLayer()
-    private let handleSize: CGFloat = 14
+    private let handleSize: CGFloat = 22
     private var resizeHandles: [(corner: ResizeCorner, view: UIView)] = []
 
     // MARK: - Init
@@ -120,7 +120,9 @@ final class CanvasTextView: UITextView {
     @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
         guard let superview else { return }
 
-        coordinator?.select(self)
+        if !isFirstResponder {
+            coordinator?.select(self)
+        }
 
         let translation = gesture.translation(in: superview)
         center = CGPoint(
