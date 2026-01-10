@@ -27,7 +27,7 @@ struct CanvasView: UIViewRepresentable {
         let contentSize = CGSize(width: 5000, height: 5000)
         
         canvasView.contentSize = contentSize
-        canvasView.backgroundColor = .clear
+        canvasView.backgroundColor = .white
         
         // Add data
         canvasView.drawing = drawing ?? PKDrawing()
@@ -46,9 +46,9 @@ struct CanvasView: UIViewRepresentable {
         
         // Grid background
         let gridView = DotGridView(frame: CGRect(origin: .zero, size: contentSize))
-        gridView.backgroundColor = .white
+        gridView.backgroundColor = .clear
         gridView.isUserInteractionEnabled = false
-        canvasView.insertSubview(gridView, at: 0)
+        canvasView.addSubview(gridView)
         
         // Drawing
         canvasView.drawingPolicy = .pencilOnly
