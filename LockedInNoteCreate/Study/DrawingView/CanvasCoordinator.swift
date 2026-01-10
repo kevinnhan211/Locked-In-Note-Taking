@@ -28,6 +28,8 @@ final class CanvasCoordinator: NSObject,
     @objc func handleTap(_ gesture: UITapGestureRecognizer) {
         guard parent.isTextModeEnabled else { return }
         guard let canvas = gesture.view as? PKCanvasView else { return }
+        
+        cleanupIfEmpty(selectedTextView)
 
         let location = gesture.location(in: canvas)
 
@@ -59,16 +61,18 @@ final class CanvasCoordinator: NSObject,
     }
 
     private func configure(_ textView: CanvasTextView) {
-        textView.fontPickerDelegate = self
-        textView.onRequestFontPicker = { [weak self] in
-            self?.presentFontPicker()
-        }
+        textView.coordinator = self
     }
-
-    private func select(_ textView: CanvasTextView) {
-        selectedTextView?.setSelected(false)
-        selectedTextView = textView
-        textView.setSelected(true)
+    
+    private func cleanupIfEmpty(_ textView: CanvasTextView?) {
+        guard let textView else { return }
+        let trimmed = textView.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            textView.removeFromSuperview()
+            if selectedTextView === textView {
+                selectedTextView = nil
+            }
+        }
     }
 
     // MARK: - Edit Menu
@@ -143,6 +147,11 @@ final class CanvasCoordinator: NSObject,
     }
 
     // MARK: - UITextViewDelegate
+    func select(_ textView: CanvasTextView) {
+        selectedTextView?.setSelected(false)
+        selectedTextView = textView
+        textView.setSelected(true)
+    }
 
     func textViewDidEndEditing(_ textView: UITextView) {
         let trimmed = textView.text.trimmingCharacters(in: .whitespacesAndNewlines)
