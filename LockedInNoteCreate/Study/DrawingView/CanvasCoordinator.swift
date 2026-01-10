@@ -172,7 +172,28 @@ final class CanvasCoordinator: NSObject,
         selectedTextView?.setSelected(false)
         selectedTextView = textView
         textView.setSelected(true)
+        
+        parent.selectedTextViewBinding = textView
     }
+    
+    // MARK: - Text Styling API (Used by SwiftUI)
+
+    func setFont(_ font: UIFont) {
+        guard let textView = selectedTextView else { return }
+        textView.font = font
+    }
+
+    func setFontSize(_ size: CGFloat) {
+        guard let textView = selectedTextView else { return }
+        let currentFont = textView.font ?? .systemFont(ofSize: size)
+        textView.font = currentFont.withSize(size)
+    }
+
+    func setTextColor(_ color: UIColor) {
+        guard let textView = selectedTextView else { return }
+        textView.textColor = color
+    }
+
 
     func textViewDidEndEditing(_ textView: UITextView) {
         guard let textView = textView as? CanvasTextView else { return }

@@ -12,6 +12,8 @@ struct CanvasView: UIViewRepresentable {
     @Binding var drawing : PKDrawing?
     @Binding var textData : [UITextView]?
     
+    @Binding var selectedTextViewBinding: CanvasTextView?
+    
     let toolPicker = PKToolPicker()
     
     func makeCoordinator() -> CanvasCoordinator {
@@ -95,6 +97,7 @@ struct CanvasView: UIViewRepresentable {
         if !isTextModeEnabled {
             context.coordinator.cleanupEmptyTextIfNeeded()
             context.coordinator.deselectText()
+            selectedTextViewBinding = nil
         }
         
         if isTextModeEnabled == false && isDrawingEnabled {
@@ -115,6 +118,7 @@ struct CanvasView: UIViewRepresentable {
 struct DrawingView: View {
     @State private var isDrawingEnabled = true
     @State private var isTextModeEnabled = false
+    @State private var selectedTextView: CanvasTextView? = nil
     
     @Binding var title : String
     @Binding var drawing : PKDrawing?
@@ -130,7 +134,13 @@ struct DrawingView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(LinearGradient(colors: [.gradientBottom, .gradientTop], startPoint: .bottom, endPoint: .top))
                 
-                CanvasView(isDrawingEnabled: $isDrawingEnabled, isTextModeEnabled: $isTextModeEnabled, drawing:$drawing, textData: $textData)
+                CanvasView(
+                    isDrawingEnabled: $isDrawingEnabled,
+                    isTextModeEnabled: $isTextModeEnabled,
+                    drawing:$drawing,
+                    textData: $textData,
+                    selectedTextViewBinding: $selectedTextView
+                )
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color.clear)
                 
@@ -196,6 +206,25 @@ struct DrawingView: View {
                         }
                     }
                     .foregroundStyle(.white)
+                
+                HStack {
+                    Spacer()
+                    
+                    TextToolbar(
+                        isVisible: .constant(isTextModeEnabled && selectedTextView != nil),
+                        onFontChange: { font in
+                            selectedTextView?.font = font
+                        },
+                        onFontSizeChange: { size in
+                            guard let tv = selectedTextView else { return }
+                            tv.font = tv.font?.withSize(size)
+                        },
+                        onTextColorChange: { color in
+                            selectedTextView?.textColor = color
+                        }
+                    )
+
+                }
                 
             }
         }
