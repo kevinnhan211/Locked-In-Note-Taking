@@ -172,4 +172,28 @@ final class CanvasTextView: UITextView {
         gesture.setTranslation(.zero, in: superview)
     }
     
+    func toTextData() -> TextData {
+        let color = textColor ?? .black
+        var r: CGFloat = 0
+        var g: CGFloat = 0
+        var b: CGFloat = 0
+        var a: CGFloat = 0
+        color.getRed(&r, green: &g, blue: &b, alpha: &a)
+
+        return TextData(
+            id: UUID(),
+            text: text,
+            centerX: center.x,
+            centerY: center.y,
+            width: bounds.width,
+            height: bounds.height,
+            fontName: font?.fontName ?? UIFont.systemFont(ofSize: 20).fontName,
+            fontSize: font?.pointSize ?? 20,
+            textColorRed: r,
+            textColorGreen: g,
+            textColorBlue: b,
+            textColorAlpha: a
+        )
+    }
+
 }

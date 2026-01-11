@@ -10,9 +10,10 @@ struct CanvasView: UIViewRepresentable {
     @Binding var isDrawingEnabled: Bool
     @Binding var isTextModeEnabled: Bool
     @Binding var drawing : PKDrawing?
-    @Binding var textData : [UITextView]?
+    @Binding var textData : [TextData]
     
     @Binding var selectedTextViewBinding: CanvasTextView?
+    @Binding var saveText : Bool
     
     let toolPicker = PKToolPicker()
     
@@ -33,8 +34,30 @@ struct CanvasView: UIViewRepresentable {
         
         // Add data
         canvasView.drawing = drawing ?? PKDrawing()
-        for i in 0..<(textData?.count ?? 0) {
-            let textView = textData![i]
+
+        // Add text
+        for data in textData {
+            let textView = CanvasTextView(
+                frame: CGRect(
+                    x: 0,
+                    y: 0,
+                    width: data.width,
+                    height: data.height
+                )
+            )
+
+            textView.text = data.text
+            textView.center = CGPoint(x: data.centerX, y: data.centerY)
+            textView.font = UIFont(name: data.fontName, size: data.fontSize)
+            textView.textColor = UIColor(
+                red: data.textColorRed,
+                green: data.textColorGreen,
+                blue: data.textColorBlue,
+                alpha: data.textColorAlpha
+            )
+
+            textView.coordinator = context.coordinator
+            context.coordinator.textViews.append(textView)
             canvasView.addSubview(textView)
         }
         
@@ -90,14 +113,19 @@ struct CanvasView: UIViewRepresentable {
         
         if drawing != uiView.drawing {
             DispatchQueue.main.async {
+                print("hiya")
                 drawing = uiView.drawing
             }
         }
         
         if !isTextModeEnabled {
-            context.coordinator.cleanupEmptyTextIfNeeded()
             context.coordinator.deselectText()
             selectedTextViewBinding = nil
+        }
+        
+        if saveText {
+            print("loving it")
+            context.coordinator.saveAllText()
         }
         
         if isTextModeEnabled == false && isDrawingEnabled {
@@ -105,11 +133,7 @@ struct CanvasView: UIViewRepresentable {
             toolPicker.addObserver(uiView)
             uiView.becomeFirstResponder()
         }
-        
-        for i in 0..<(textData?.count ?? 0) {
-            let textView = textData![i]
-            print(textView.text!)
-        }
+
     }
 
 
@@ -118,11 +142,12 @@ struct CanvasView: UIViewRepresentable {
 struct DrawingView: View {
     @State private var isDrawingEnabled = true
     @State private var isTextModeEnabled = false
+    @State private var doSave = false
     @State private var selectedTextView: CanvasTextView? = nil
     
     @Binding var title : String
     @Binding var drawing : PKDrawing?
-    @Binding var textData : [UITextView]?
+    @Binding var textData : [TextData]
     @Binding var showingCanvas : Bool
     
     @Environment(\.undoManager) var undoManager
@@ -139,7 +164,8 @@ struct DrawingView: View {
                     isTextModeEnabled: $isTextModeEnabled,
                     drawing:$drawing,
                     textData: $textData,
-                    selectedTextViewBinding: $selectedTextView
+                    selectedTextViewBinding: $selectedTextView,
+                    saveText: $doSave
                 )
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color.clear)
@@ -183,6 +209,7 @@ struct DrawingView: View {
                         ToolbarItem(placement: .topBarLeading) {
                             HStack (spacing:15) {
                                 Button {
+                                    doSave = true
                                     showingCanvas = false
                                 } label: {
                                     Text("Back")
@@ -234,7 +261,7 @@ struct DrawingView: View {
 struct DrawingViewPreviewWrapper: View {
     @State private var title = "asdf"
     @State private var drawing: PKDrawing? = PKDrawing()
-    @State private var textData : [UITextView]? = []
+    @State private var textData : [TextData] = []
     @State private var showingCanvas = true
 
     var body: some View {

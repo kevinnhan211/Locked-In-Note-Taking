@@ -16,5 +16,5 @@ struct Note : Identifiable {
     var tags : [String]
     
     var drawingData: PKDrawing?
-    var textData : [UITextView]?
+    var textData : [TextData] = []
 }

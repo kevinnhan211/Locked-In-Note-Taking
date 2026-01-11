@@ -15,9 +15,10 @@ final class CanvasCoordinator: NSObject,
                                UIFontPickerViewControllerDelegate {
 
     // MARK: - References
-
     let parent: CanvasView
+    
     weak var selectedTextView: CanvasTextView?
+    var textViews: [CanvasTextView] = []
 
     init(parent: CanvasView) {
         self.parent = parent
@@ -42,7 +43,6 @@ final class CanvasCoordinator: NSObject,
         let textView = createTextView(at: location, in: canvas)
         configure(textView)
         select(textView)
-        showTextEditMenu(for: textView)
     }
 
     // MARK: - Text View Helpers
@@ -53,10 +53,31 @@ final class CanvasCoordinator: NSObject,
     }
 
     private func createTextView(at point: CGPoint, in canvas: PKCanvasView) -> CanvasTextView {
-        let textView = CanvasTextView(frame: CGRect(x: point.x, y: point.y, width: 240, height: 40))
+        let textView = CanvasTextView(
+            frame: CGRect(x: point.x, y: point.y, width: 240, height: 40)
+        )
         textView.canvasPosition = point
         canvas.addSubview(textView)
+
+        textViews.append(textView)
         return textView
+    }
+    
+    func saveAllText() {
+        var newData: [TextData] = []
+
+        for textView in textViews {
+            let trimmed = textView.text.trimmingCharacters(in: .whitespacesAndNewlines)
+
+            if trimmed.isEmpty {
+                textView.removeFromSuperview()
+                continue
+            }
+
+            newData.append(textView.toTextData())
+        }
+
+        parent.textData = newData
     }
     
     func textViewDidBeginEditing(_ textView: UITextView) {
@@ -96,44 +117,6 @@ final class CanvasCoordinator: NSObject,
         selectedTextView = nil
     }
 
-    // MARK: - Edit Menu
-
-    private func showTextEditMenu(for textView: UITextView) {
-        DispatchQueue.main.async {
-            textView.becomeFirstResponder()
-
-            // Force caret (required)
-            let position = textView.endOfDocument
-            textView.selectedTextRange = textView.textRange(
-                from: position,
-                to: position
-            )
-
-            let rect = CGRect(
-                x: textView.bounds.midX,
-                y: textView.bounds.minY,
-                width: 1,
-                height: 1
-            )
-
-            if let interaction = textView.interactions
-                .compactMap({ $0 as? UIEditMenuInteraction })
-                .first {
-
-                interaction.presentEditMenu(
-                    with: UIEditMenuConfiguration(
-                        identifier: nil,
-                        sourcePoint: CGPoint(x: rect.midX, y: rect.minY)
-                    )
-                )
-            } else {
-                UIMenuController.shared.showMenu(
-                    from: textView,
-                    rect: rect
-                )
-            }
-        }
-    }
 
     // MARK: - Font Picker
 
