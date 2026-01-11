@@ -35,32 +35,6 @@ struct CanvasView: UIViewRepresentable {
         // Add data
         canvasView.drawing = drawing ?? PKDrawing()
 
-        // Add text
-        for data in textData {
-            let textView = CanvasTextView(
-                frame: CGRect(
-                    x: 0,
-                    y: 0,
-                    width: data.width,
-                    height: data.height
-                )
-            )
-
-            textView.text = data.text
-            textView.center = CGPoint(x: data.centerX, y: data.centerY)
-            textView.font = UIFont(name: data.fontName, size: data.fontSize)
-            textView.textColor = UIColor(
-                red: data.textColorRed,
-                green: data.textColorGreen,
-                blue: data.textColorBlue,
-                alpha: data.textColorAlpha
-            )
-
-            textView.coordinator = context.coordinator
-            context.coordinator.textViews.append(textView)
-            canvasView.addSubview(textView)
-        }
-        
         // Start in centre
         let viewSize = canvasView.bounds.size
         let centerOffset = CGPoint(
@@ -86,6 +60,35 @@ struct CanvasView: UIViewRepresentable {
         canvasView.maximumZoomScale = 1.6
         canvasView.zoomScale = 1.0
         
+        // Add text (RESET to base canvas space)
+        for data in textData {
+            let textView = CanvasTextView(
+                frame: CGRect(x: 0, y: 0, width: data.width, height: data.height)
+            )
+
+            textView.text = data.text
+            textView.font = UIFont(name: data.fontName, size: data.fontSize)
+            textView.textColor = UIColor(
+                red: data.textColorRed,
+                green: data.textColorGreen,
+                blue: data.textColorBlue,
+                alpha: data.textColorAlpha
+            )
+
+            // Store original logical position
+            textView.canvasPosition = CGPoint(
+                x: data.centerX,
+                y: data.centerY
+            )
+
+            textView.transform = .identity
+            textView.center = textView.canvasPosition
+
+            textView.coordinator = context.coordinator
+            context.coordinator.textViews.append(textView)
+            canvasView.addSubview(textView)
+        }
+        
         // Tool Picker
         toolPicker.setVisible(true, forFirstResponder: canvasView)
         toolPicker.addObserver(canvasView)
@@ -95,11 +98,12 @@ struct CanvasView: UIViewRepresentable {
         canvasView.delegate = context.coordinator
         
         // Add text
-        let tapGesture = UITapGestureRecognizer(
+        let tap = UITapGestureRecognizer(
             target: context.coordinator,
-            action: #selector(Coordinator.handleTap(_:))
+            action: #selector(CanvasCoordinator.handleTap)
         )
-        canvasView.addGestureRecognizer(tapGesture)
+        tap.cancelsTouchesInView = false
+        canvasView.addGestureRecognizer(tap)
         
         return canvasView
     }
@@ -111,21 +115,16 @@ struct CanvasView: UIViewRepresentable {
         uiView.panGestureRecognizer.minimumNumberOfTouches =
         isDrawingEnabled ? 2 : 1
         
-        if drawing != uiView.drawing {
-            DispatchQueue.main.async {
-                print("hiya")
-                drawing = uiView.drawing
-            }
-        }
-        
         if !isTextModeEnabled {
             context.coordinator.deselectText()
             selectedTextViewBinding = nil
         }
         
         if saveText {
-            print("loving it")
             context.coordinator.saveAllText()
+            DispatchQueue.main.async {
+                drawing = uiView.drawing
+            }
         }
         
         if isTextModeEnabled == false && isDrawingEnabled {

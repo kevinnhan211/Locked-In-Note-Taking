@@ -25,15 +25,19 @@ final class CanvasCoordinator: NSObject,
     }
 
     // MARK: - Tap Handling
-
     @objc func handleTap(_ gesture: UITapGestureRecognizer) {
         guard parent.isTextModeEnabled else { return }
         guard let canvas = gesture.view as? PKCanvasView else { return }
 
-        let location = gesture.location(in: canvas)
+        let location = canvas.convert(
+            gesture.location(in: canvas),
+            to: canvas
+        )
 
-        // if tap hit an existing text view, DO NOTHING
-        if textView(at: location, in: canvas) != nil {
+        // If tap hit an existing text view, show selection
+        if let textView = textView(at: location, in: canvas) {
+            select(textView)
+            textView.becomeFirstResponder()
             return
         }
 
@@ -43,6 +47,7 @@ final class CanvasCoordinator: NSObject,
         let textView = createTextView(at: location, in: canvas)
         configure(textView)
         select(textView)
+        textView.becomeFirstResponder()
     }
 
     // MARK: - Text View Helpers
@@ -58,7 +63,7 @@ final class CanvasCoordinator: NSObject,
         )
         textView.canvasPosition = point
         canvas.addSubview(textView)
-
+        
         textViews.append(textView)
         return textView
     }
@@ -83,6 +88,7 @@ final class CanvasCoordinator: NSObject,
     func textViewDidBeginEditing(_ textView: UITextView) {
         guard let textView = textView as? CanvasTextView else { return }
         select(textView)
+        textView.setSelected(true)
     }
 
     private func configure(_ textView: CanvasTextView) {
@@ -203,15 +209,16 @@ extension CanvasCoordinator: UIScrollViewDelegate {
         let scale = canvas.zoomScale
 
         for case let textView as CanvasTextView in canvas.subviews {
+
+            // scale text
             textView.transform = CGAffineTransform(scaleX: scale, y: scale)
-            
-            let base = textView.canvasPosition
+
+            // reposition from ORIGINAL canvas space
             textView.center = CGPoint(
-                x: base.x * scale,
-                y: base.y * scale
+                x: textView.canvasPosition.x * scale,
+                y: textView.canvasPosition.y * scale
             )
         }
-        
     }
 
 }

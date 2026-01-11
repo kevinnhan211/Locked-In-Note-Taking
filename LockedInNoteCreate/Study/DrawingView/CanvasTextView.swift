@@ -1,4 +1,5 @@
 import UIKit
+import PencilKit
 
 final class CanvasTextView: UITextView {
     private enum ResizeCorner {
@@ -116,7 +117,7 @@ final class CanvasTextView: UITextView {
         )
         addGestureRecognizer(pan)
     }
-
+    
     @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
         guard let superview else { return }
 
@@ -130,7 +131,13 @@ final class CanvasTextView: UITextView {
             y: center.y + translation.y
         )
 
-        canvasPosition = center
+        if let canvas = superview as? PKCanvasView {
+            canvasPosition = CGPoint(
+                x: center.x / canvas.zoomScale,
+                y: center.y / canvas.zoomScale
+            )
+        }
+
         gesture.setTranslation(.zero, in: superview)
     }
     
@@ -183,8 +190,8 @@ final class CanvasTextView: UITextView {
         return TextData(
             id: UUID(),
             text: text,
-            centerX: center.x,
-            centerY: center.y,
+            centerX: canvasPosition.x,
+            centerY: canvasPosition.y,
             width: bounds.width,
             height: bounds.height,
             fontName: font?.fontName ?? UIFont.systemFont(ofSize: 20).fontName,
@@ -194,6 +201,7 @@ final class CanvasTextView: UITextView {
             textColorBlue: b,
             textColorAlpha: a
         )
+
     }
 
 }
