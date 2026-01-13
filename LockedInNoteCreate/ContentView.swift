@@ -21,6 +21,11 @@ struct ContentView: View {
                     Label("Notes", systemImage:"note")
                 }
             
+            QuizView()
+                .tabItem {
+                    Label("Study", systemImage:"lamp.desk.fill")
+                }
+            
 //            MainShopView()
 //                .tabItem {
 //                    Label("Shop", systemImage:"cart")
