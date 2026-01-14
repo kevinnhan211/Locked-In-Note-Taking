@@ -42,7 +42,7 @@ struct MenuFlashcard: View {
                     .frame(width: 25, height: 25)
                     .foregroundStyle(.gray)
             }
-            .alert("Delete Note", isPresented: $warning) {
+            .alert("Delete Flashcard", isPresented: $warning) {
                 Button(role: .cancel) {
                     warning = false
                 }

@@ -13,6 +13,8 @@ struct FlashcardStudySheet: View {
     var onSave: () -> Void
     @Environment(\.dismiss) var dismiss
     
+    @State private var showReviewSheet = false
+    
     private func deleteCard(at index: Int) {
         guard flashcard.cards.indices.contains(index) else { return }
         flashcard.cards.remove(at: index)
@@ -100,7 +102,7 @@ struct FlashcardStudySheet: View {
                                         
                                         HStack {
                                             ZStack(alignment:.leading) {
-                                                if flashcard.description.isEmpty {
+                                                if flashcard.cards[index].term.isEmpty {
                                                     Text("Enter term")
                                                         .foregroundStyle(.gray)
                                                         .padding()
@@ -112,7 +114,7 @@ struct FlashcardStudySheet: View {
                                             Spacer()
                                             
                                             ZStack(alignment:.leading) {
-                                                if flashcard.description.isEmpty {
+                                                if flashcard.cards[index].definition.isEmpty {
                                                     Text("Enter definition")
                                                         .foregroundStyle(.gray)
                                                         .padding()
@@ -168,9 +170,9 @@ struct FlashcardStudySheet: View {
                     .padding(.top,10)
                 ) {
                     HStack(spacing:25) {
-                        // MARK: Practice button
+                        // MARK: Review button
                         Button {
-
+                            showReviewSheet = true
                         } label: {
                             ZStack {
                                 RoundedRectangle(cornerRadius:12)
@@ -188,7 +190,7 @@ struct FlashcardStudySheet: View {
                         }
                         .padding(.top,20)
                         
-                        // MARK: Test button
+                        // MARK: Quiz button
                         Button {
 
                         } label: {
@@ -253,6 +255,10 @@ struct FlashcardStudySheet: View {
                             .foregroundStyle(.tint)
                     }
                 }
+            }
+            
+            .fullScreenCover(isPresented: $showReviewSheet) {
+                FlashcardReviewSheet(showScreen: $showReviewSheet, flashcard: $flashcard)
             }
             
         }
