@@ -29,7 +29,13 @@ struct FlashcardStudySheet: View {
                     .padding(.top,15)
                 ) {
                     VStack(spacing:25) {
-                        TextField("Title", text: $flashcard.title)
+                        ZStack(alignment:.leading) {
+                            if flashcard.title.isEmpty {
+                                Text("Enter title")
+                                    .foregroundStyle(.gray)
+                            }
+                            TextField("", text: $flashcard.title)
+                        }
                     }
                     .font(.custom("Futura Medium", size: 17))
                     .foregroundStyle(Color.white)
@@ -44,7 +50,13 @@ struct FlashcardStudySheet: View {
                     .padding(.top,10)
                 ) {
                     VStack(spacing:25) {
-                        TextField("Description", text: $flashcard.description)
+                        ZStack(alignment:.leading) {
+                            if flashcard.description.isEmpty {
+                                Text("Enter description")
+                                    .foregroundStyle(.gray)
+                            }
+                            TextField("", text: $flashcard.description)
+                        }
                     }
                     .font(.custom("Futura Medium", size: 17))
                     .foregroundStyle(Color.white)
@@ -58,38 +70,65 @@ struct FlashcardStudySheet: View {
                     .padding(.bottom,5)
                     .padding(.top,10)
                 ) {
-                    VStack(spacing:25) {
+                    VStack(alignment: .center, spacing: 25) {
                         // MARK: list of cards
                         ScrollView {
                             ForEach(flashcard.cards.indices, id: \.self) { index in
-                                let card = flashcard.cards[index]
-                                
-                                VStack {
-                                    HStack {
-                                        Text("\(index+1)")
-                                            .bold()
-                                        
-                                        Spacer()
-                                        
-                                        // MARK: Delete card
-                                        Button {
-                                            deleteCard(at: index)
-                                        } label: {
-                                            Image(systemName: "trash")
-                                        }
-                                    }
-                                    .font(.custom("Futura Medium", size: 16))
-                                    .foregroundColor(.white)
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .frame(width:350,height:100)
+                                        .foregroundStyle(.buttonColour)
                                     
-                                    HStack {
-                                        TextField("Term", text: $flashcard.cards[index].term)
-                                        Spacer()
-                                        TextField("Definition", text: $flashcard.cards[index].definition)
+                                    VStack {
+                                        HStack {
+                                            Text("Card \(index+1)")
+                                                .bold()
+                                            
+                                            Spacer()
+                                            
+                                            // MARK: Delete card
+                                            Button {
+                                                deleteCard(at: index)
+                                            } label: {
+                                                Image(systemName: "trash")
+                                            }
+                                        }
+                                        .font(.custom("Futura Medium", size: 16))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal,25)
+                                        .padding(.top,20)
+                                        
+                                        HStack {
+                                            ZStack(alignment:.leading) {
+                                                if flashcard.description.isEmpty {
+                                                    Text("Enter term")
+                                                        .foregroundStyle(.gray)
+                                                        .padding()
+                                                }
+                                                TextField("", text: $flashcard.cards[index].term)
+                                                    .padding()
+                                            }
+                                            
+                                            Spacer()
+                                            
+                                            ZStack(alignment:.leading) {
+                                                if flashcard.description.isEmpty {
+                                                    Text("Enter definition")
+                                                        .foregroundStyle(.gray)
+                                                        .padding()
+                                                }
+                                                TextField("", text: $flashcard.cards[index].definition)
+                                                    .padding()
+                                            }
+                                        }
+                                        .font(.custom("Futura Medium", size: 16))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 25)
+                                        
                                     }
-                                    .font(.custom("Futura Medium", size: 16))
-                                    .foregroundColor(.white)
                                 }
-                                .padding(.bottom, 8)
+                                .frame(width:350, height:100)
+                                .padding(.top,10)
                                 
                             }
                             
@@ -114,9 +153,60 @@ struct FlashcardStudySheet: View {
                                 }
                             }
                             .padding(.top,20)
-                            .padding(.leading,90)
+                            
                         }
                         
+                    }
+                }
+                .listRowBackground(Color.gray.opacity(0.3))
+                
+                // MARK: Practice section
+                Section(header: Text("Study")
+                    .font(.custom("Futura Medium", size: 23))
+                    .foregroundStyle(.white)
+                    .padding(.bottom,5)
+                    .padding(.top,10)
+                ) {
+                    HStack(spacing:25) {
+                        // MARK: Practice button
+                        Button {
+
+                        } label: {
+                            ZStack {
+                                RoundedRectangle(cornerRadius:12)
+                                    .frame(width:150,height:55)
+                                    .foregroundStyle(.gradientTop)
+                                
+                                HStack {
+                                    Text("Review")
+                                    Image(systemName: "arrowshape.turn.up.left.fill")
+                                        .bold()
+                                }
+                                .font(.custom("Futura Medium", size: 17))
+                                .foregroundStyle(.white)
+                            }
+                        }
+                        .padding(.top,20)
+                        
+                        // MARK: Test button
+                        Button {
+
+                        } label: {
+                            ZStack {
+                                RoundedRectangle(cornerRadius:12)
+                                    .frame(width:150,height:55)
+                                    .foregroundStyle(.gradientTop)
+                                
+                                HStack {
+                                    Text("Quiz")
+                                    Image(systemName: "graduationcap.fill")
+                                        .bold()
+                                }
+                                .font(.custom("Futura Medium", size: 17))
+                                .foregroundStyle(.white)
+                            }
+                        }
+                        .padding(.top,20)
                     }
                 }
                 .listRowBackground(Color.gray.opacity(0.3))
@@ -141,6 +231,7 @@ struct FlashcardStudySheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(action:{
+                        onSave()
                         dismiss()
                     }) {
                         Text("Exit")
@@ -157,7 +248,7 @@ struct FlashcardStudySheet: View {
                         onSave()
                         dismiss()
                     } label: {
-                        Text("Save")
+                        Text("Done")
                             .font(.custom("Futura Medium", size: 16))
                             .foregroundStyle(.tint)
                     }

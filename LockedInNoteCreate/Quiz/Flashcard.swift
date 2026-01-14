@@ -18,6 +18,5 @@ struct Flashcard : Identifiable, Equatable {
     var title : String
     var description : String = ""
     
-    var terms : Int
     var cards : [Card]
 }

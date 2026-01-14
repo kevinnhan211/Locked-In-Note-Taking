@@ -13,7 +13,6 @@ struct FlashcardContainer: View {
     @State private var editingFlashcard = Flashcard(
         title: "",
         description: "",
-        terms: 0,
         cards : []
     )
 
@@ -40,7 +39,7 @@ struct FlashcardContainer: View {
                                     .bold()
                                     .foregroundStyle(.white)
 
-                                Text("\(flashcard.terms) Terms")
+                                Text("\(flashcard.cards.count) Terms")
                                     .foregroundStyle(.gray)
                                     .font(.custom("Futura Medium", size: 15))
                             }

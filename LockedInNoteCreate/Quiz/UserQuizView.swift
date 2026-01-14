@@ -11,11 +11,7 @@ struct UserQuizView: View {
     @Binding var showUserQuiz : Bool
     
     @State private var flashcards : [Flashcard] = [
-        Flashcard(
-            title: "My Flashcard",
-            terms : 0,
-            cards : []
-        )
+
     ]
     
     var body: some View {
@@ -70,7 +66,7 @@ struct UserQuizView: View {
                 // Add quiz button
                 Button {
                     flashcards.append(
-                        Flashcard(title: "Untitled Flashcard", terms: 0, cards : [])
+                        Flashcard(title: "Untitled Flashcard", cards : [])
                     )
                 } label: {
                     ZStack{
