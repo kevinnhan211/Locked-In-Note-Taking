@@ -54,12 +54,12 @@ struct FlashcardReviewSheet: View {
                         HStack {
                             // MARK: Back button
                             Button {
-                              currentIndex = max(0, currentIndex - 1)
+                                currentIndex = max(0, currentIndex - 1)
                                 onTermSide = true
+                                print(currentIndex)
                             } label: {
                                 ZStack {
                                     RoundedRectangle(cornerRadius:12)
-                                        .frame(width:50,height:55)
                                         .foregroundStyle(.gradientTop)
                                     
                                     HStack {
@@ -68,19 +68,20 @@ struct FlashcardReviewSheet: View {
                                     .font(.custom("Futura Medium", size: 14))
                                     .foregroundStyle(.white)
                                 }
+                                .frame(width:50,height:55)
                             }
-                            .frame(width:50,height:55)
-                            .padding(.top,20)
+                            .buttonStyle(.plain)
+                            .contentShape(Rectangle())
                             
                             // MARK: Next button
                             Button {
                                 let lastIndex = flashcard.cards.count - 1
                                 currentIndex = min(lastIndex, currentIndex + 1)
                                 onTermSide = true
+                                print(currentIndex)
                             } label: {
                                 ZStack {
                                     RoundedRectangle(cornerRadius:12)
-                                        .frame(width:50,height:55)
                                         .foregroundStyle(.gradientTop)
                                     
                                     HStack {
@@ -89,19 +90,20 @@ struct FlashcardReviewSheet: View {
                                     .font(.custom("Futura Medium", size: 14))
                                     .foregroundStyle(.white)
                                 }
+                                .frame(width:50,height:55)
                             }
-                            .padding(.top,20)
-                            .frame(width:50,height:55)
+                            .buttonStyle(.plain)
+                            .contentShape(Rectangle())
                             
                             Spacer()
                             
                             // MARK: flip button
                             Button {
                                 onTermSide.toggle()
+                                print(onTermSide)
                             } label: {
                                 ZStack {
                                     RoundedRectangle(cornerRadius:12)
-                                        .frame(width:100,height:55)
                                         .foregroundStyle(.gradientTop)
                                     
                                     HStack {
@@ -110,9 +112,10 @@ struct FlashcardReviewSheet: View {
                                     .font(.custom("Futura Medium", size: 14))
                                     .foregroundStyle(.white)
                                 }
+                                .frame(width:100,height:55)
                             }
-                            .frame(width:100,height:55)
-                            .padding(.top,20)
+                            .buttonStyle(.plain)
+                            .contentShape(Rectangle())
                         }
                     }
                 }

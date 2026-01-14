@@ -7,6 +7,55 @@
 
 import SwiftUI
 
+private struct StudyButtonsView: View {
+    @Binding var showReviewSheet: Bool
+
+    var body: some View {
+        HStack(spacing: 25) {
+            Button {
+                showReviewSheet = true
+            } label: {
+                ZStack {
+                    RoundedRectangle(cornerRadius:12)
+                        .frame(width:150,height:55)
+                        .foregroundStyle(.gradientTop)
+
+                    HStack {
+                        Text("Review")
+                        Image(systemName: "arrowshape.turn.up.left.fill")
+                            .bold()
+                    }
+                    .font(.custom("Futura Medium", size: 17))
+                    .foregroundStyle(.white)
+                }
+            }
+            .buttonStyle(.plain)
+            .contentShape(Rectangle())
+
+            Button {
+                // quiz
+            } label: {
+                ZStack {
+                    RoundedRectangle(cornerRadius:12)
+                        .frame(width:150,height:55)
+                        .foregroundStyle(.gradientTop)
+
+                    HStack {
+                        Text("Quiz")
+                        Image(systemName: "graduationcap.fill")
+                            .bold()
+                    }
+                    .font(.custom("Futura Medium", size: 17))
+                    .foregroundStyle(.white)
+                }
+            }
+            .buttonStyle(.plain)
+            .contentShape(Rectangle())
+        }
+    }
+}
+
+
 struct FlashcardStudySheet: View {
     @Binding var flashcard: Flashcard
     
@@ -139,7 +188,8 @@ struct FlashcardStudySheet: View {
                                 flashcard.cards.append(
                                     Card(term: "", definition: "")
                                 )
-                            } label: {
+                            }
+                            label: {
                                 ZStack {
                                     RoundedRectangle(cornerRadius:12)
                                         .frame(width:150,height:55)
@@ -153,8 +203,10 @@ struct FlashcardStudySheet: View {
                                     .font(.custom("Futura Medium", size: 17))
                                     .foregroundStyle(.white)
                                 }
+                                .padding(.top,20)
                             }
-                            .padding(.top,20)
+                            .buttonStyle(.plain)
+                            .contentShape(Rectangle())
                             
                         }
                         
@@ -169,47 +221,7 @@ struct FlashcardStudySheet: View {
                     .padding(.bottom,5)
                     .padding(.top,10)
                 ) {
-                    HStack(spacing:25) {
-                        // MARK: Review button
-                        Button {
-                            showReviewSheet = true
-                        } label: {
-                            ZStack {
-                                RoundedRectangle(cornerRadius:12)
-                                    .frame(width:150,height:55)
-                                    .foregroundStyle(.gradientTop)
-                                
-                                HStack {
-                                    Text("Review")
-                                    Image(systemName: "arrowshape.turn.up.left.fill")
-                                        .bold()
-                                }
-                                .font(.custom("Futura Medium", size: 17))
-                                .foregroundStyle(.white)
-                            }
-                        }
-                        .padding(.top,20)
-                        
-                        // MARK: Quiz button
-                        Button {
-
-                        } label: {
-                            ZStack {
-                                RoundedRectangle(cornerRadius:12)
-                                    .frame(width:150,height:55)
-                                    .foregroundStyle(.gradientTop)
-                                
-                                HStack {
-                                    Text("Quiz")
-                                    Image(systemName: "graduationcap.fill")
-                                        .bold()
-                                }
-                                .font(.custom("Futura Medium", size: 17))
-                                .foregroundStyle(.white)
-                            }
-                        }
-                        .padding(.top,20)
-                    }
+                    StudyButtonsView(showReviewSheet: $showReviewSheet)
                 }
                 .listRowBackground(Color.gray.opacity(0.3))
                 
